@@ -10,6 +10,8 @@ namespace Slasher.Client
     {
         static void Main(string[] args)
         {
+            ClientInterface clientInterface = new ClientInterface();
+            clientInterface.start();
         }
     }
 }
