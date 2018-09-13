@@ -10,6 +10,9 @@ namespace Slasher.Server
     {
         static void Main(string[] args)
         {
+            ServerInterface serverInterface = new ServerInterface();
+            serverInterface.Start();
+            Console.ReadLine();
         }
     }
 }
