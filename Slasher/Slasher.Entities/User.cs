@@ -11,13 +11,18 @@ namespace Slasher.Entities
         public string NickName { get; set; }
         public string Avatar { get; set; }
         public Character Character { get; set; }
+        public bool Connected { get; set; }
 
         public User(string nickname, string avatar)
         {
             NickName = nickname;
             Avatar = avatar;
         }
-        
+
+        public User()
+        {
+        }
+
         public override bool Equals(object objectToCompare)
         {
             if (objectToCompare == null || !objectToCompare.GetType().Equals(this.GetType()))

@@ -35,7 +35,7 @@ namespace Slasher.Client
         private bool authenticateClient(string name)
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.getStreamAuthenticationUser(name);
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "01", name);
             clientStream.Write(data, 0, data.Length);
 
             var response = new byte[12];
@@ -46,6 +46,17 @@ namespace Slasher.Client
 
         }
 
+        public void SendMovement(string movement)
+        {
+            NetworkStream clientStream = TcpClient.GetStream();
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "10", movement);
+            clientStream.Write(data, 0, data.Length);
 
+            var response = new byte[12];
+            response = Protocol.GetData(TcpClient, 12);
+        /*    if (response != null)
+                return Protocol.checkIfLogged(response);
+            return false;*/
+        }
     }
 }

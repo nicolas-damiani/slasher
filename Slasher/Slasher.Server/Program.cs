@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Slasher.Server
@@ -12,7 +13,6 @@ namespace Slasher.Server
         {
             ServerInterface serverInterface = new ServerInterface();
             serverInterface.Start();
-            Console.ReadLine();
         }
     }
 }

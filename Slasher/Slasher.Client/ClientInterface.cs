@@ -56,6 +56,9 @@ namespace Slasher.Client
                     case 1:
                         registerUser();
                         break;
+                    case 3:
+                        sendMovement();
+                        break;
                     default:
                         Console.WriteLine("Comando invalido");
                         break;
@@ -75,7 +78,7 @@ namespace Slasher.Client
             string nickname = Console.ReadLine();
             Console.WriteLine("Ingrese un avatar (nombre)");
             string avatar = Console.ReadLine();
-            bool added = clientLogic.connect(nickname, "192.168.1.49", 6000);
+            bool added = clientLogic.connect(nickname, "192.168.1.53", 6000);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
@@ -86,6 +89,13 @@ namespace Slasher.Client
                 registerUser();
             }
 
+        }
+
+        private void sendMovement()
+        {
+            Console.WriteLine("Ingrese movimiento escribiendo el comando");
+            string movement = Console.ReadLine();
+            clientLogic.SendMovement(movement);
         }
 
 
