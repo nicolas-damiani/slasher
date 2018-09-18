@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2019
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slasher.Entities", "Slasher.Entities\Slasher.Entities.csproj", "{3DDE6871-4FCF-42CD-855C-3978612A77B2}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slasher.Server", "Slasher.Server\Slasher.Server.csproj", "{130CC6BE-2E13-48C2-9E56-E5E85451954A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Protocols", "Protocols\Protocols.csproj", "{198C2075-221E-4005-8AFD-300B6BB9E64E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exceptions", "Exceptions\Exceptions.csproj", "{94BE0A53-D0AF-4277-895D-B3FD575F30B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +35,15 @@ Global
 		{198C2075-221E-4005-8AFD-300B6BB9E64E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{198C2075-221E-4005-8AFD-300B6BB9E64E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{198C2075-221E-4005-8AFD-300B6BB9E64E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94BE0A53-D0AF-4277-895D-B3FD575F30B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94BE0A53-D0AF-4277-895D-B3FD575F30B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94BE0A53-D0AF-4277-895D-B3FD575F30B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94BE0A53-D0AF-4277-895D-B3FD575F30B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {711A1661-C59F-4536-B4AE-2726E63B3F7A}
 	EndGlobalSection
 EndGlobal
