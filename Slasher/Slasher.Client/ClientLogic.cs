@@ -35,7 +35,7 @@ namespace Slasher.Client
         private bool authenticateClient(string name)
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.getStreamAuthenticationUser(name);
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "01", name);
             clientStream.Write(data, 0, data.Length);
 
             var response = new byte[12];

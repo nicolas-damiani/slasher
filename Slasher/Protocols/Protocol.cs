@@ -10,7 +10,7 @@ namespace Protocols
     public static class Protocol
     {
 
-        public enum SendType { REQUEST, RESPONSE}
+        public enum SendType { REQUEST, RESPONSE }
 
         public static byte[] getStreamAuthenticationUser(string name)
         {
@@ -19,8 +19,8 @@ namespace Protocols
             {
                 dataSize = "0" + dataSize;
             }
-            string stream = "REQ" + "01" + name;
-            return Encoding.ASCII.GetBytes(name);
+            string stream = "REQ" + "01" + dataSize + name;
+            return Encoding.ASCII.GetBytes(stream);
         }
 
 
@@ -35,32 +35,33 @@ namespace Protocols
 
         public static byte[] GetData(TcpClient tcpClient, int size)
         {
-            int bufferSize = tcpClient.ReceiveBufferSize;
-            NetworkStream dataStream = tcpClient.GetStream();
-            byte[] data = new byte[size];
-            int pos = 0;
-            int currentData = 0;
-
-            while (pos < size)
-            {
-                try
-                {
-                    currentData = dataStream.Read(data, pos, size - pos);
-                    pos += currentData;
-                    if (currentData == 0)
-                    {
-                        tcpClient.Close();
-                        data = null;
-                    }
-                }
-                catch (ObjectDisposedException)
-                {
-                    tcpClient.Close();
-                    return null;
-                }
-            }
-            return data;
-        }
+              int bufferSize = tcpClient.ReceiveBufferSize;
+              NetworkStream dataStream = tcpClient.GetStream();
+              byte[] data = new byte[size];
+              int pos = 0;
+              int currentData = 0;
+              
+              while (pos < size)
+              {
+                  try
+                  {
+                      currentData = dataStream.Read(data, pos, size - pos);
+                      pos += currentData;
+                      if (currentData == 0)
+                      {
+                          tcpClient.Close();
+                          data = null;
+                      }
+                  }
+                  catch (Exception e)
+                  {
+                      Console.WriteLine(e.Message);
+                      tcpClient.Close();
+                      return null;
+                  }
+              }
+              return data;
+    }
 
 
         public static int getCommandAction(byte[] stream)

@@ -37,9 +37,7 @@ namespace Slasher.Server
         internal void ConnectServer()
         {
             TcpListener listener;
-            IPAddress ipAddress = IPAddress.Parse("192.168.1.49");
-
-            
+            IPAddress ipAddress = IPAddress.Parse("192.168.1.53");
             listener = new TcpListener(ipAddress, 6000);
             Console.WriteLine("local ip address: " + ipAddress);
             listener.Start();
@@ -80,10 +78,10 @@ namespace Slasher.Server
 
             switch (command)
             {
-                case 0://cliente se conecta
+                case 01://cliente se conecta
                     string name = UnicodeEncoding.ASCII.GetString(data);
-                    client.ReceiveBufferSize = 32;
 
+                    
 
                     sendAuthorizatonData(name, nws);
                     
@@ -97,6 +95,7 @@ namespace Slasher.Server
             byte[] responseStream;
             if (!RegisteredUsers.Contains(user))
             {
+                RegisteredUsers.Add(user);
                 responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
             }
             else
