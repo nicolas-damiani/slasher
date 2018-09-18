@@ -92,13 +92,8 @@ namespace Slasher.Entities
                     if (position.Item2 == FIRST_COL)
                         throw new BoundsException();
                     break;
-                case Move.UPRIGHT:
-                    if (position.Item1 == FIRST_ROW)//ver esto
-                        throw new BoundsException();
-                    break;
                 default:
-                    Console.WriteLine("hola");
-                    break;
+                    throw new BoundsException();
             }
         }
 
