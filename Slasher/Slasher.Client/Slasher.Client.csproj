@@ -52,6 +52,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Protocols\Protocols.csproj">
+      <Project>{198C2075-221E-4005-8AFD-300B6BB9E64E}</Project>
+      <Name>Protocols</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Slasher.Entities\Slasher.Entities.csproj">
       <Project>{3DDE6871-4FCF-42CD-855C-3978612A77B2}</Project>
       <Name>Slasher.Entities</Name>

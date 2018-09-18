@@ -1,7 +1,9 @@
-﻿using Slasher.Entities;
+﻿using Protocols;
+using Slasher.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,26 +11,41 @@ namespace Slasher.Client
 {
     public class ClientLogic
     {
-        private List<User> userList;
 
-        public ClientLogic()
-        {
-            userList = new List<User>();
-        }
+        public TcpClient TcpClient { get; set; }
 
-        public bool createUser(string nickname, string avatar)
+
+
+        public bool connect(string name, string serverIP, int port)
         {
-            User user = new User(nickname, avatar);
-            if (!userList.Contains(user))
+            if (makeConnection(name, serverIP, port))
             {
-                userList.Add(user);
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
+        }
+
+        private bool makeConnection(string name, string serverIP, int port)
+        {
+            TcpClient = new TcpClient(serverIP, port);
+            return authenticateClient(name);
 
         }
+
+        private bool authenticateClient(string name)
+        {
+            NetworkStream clientStream = TcpClient.GetStream();
+            byte[] data = Protocol.getStreamAuthenticationUser(name);
+            clientStream.Write(data, 0, data.Length);
+
+            var response = new byte[12];
+            response = Protocol.GetData(TcpClient, 12);
+            if (response != null)
+                return Protocol.checkIfLogged(response);
+            return false;
+
+        }
+
+
     }
 }

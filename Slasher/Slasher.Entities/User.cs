@@ -8,7 +8,7 @@ namespace Slasher.Entities
 {
     public class User
     {
-        string NickName { get; set; }
+        public string NickName { get; set; }
         public string Avatar { get; set; }
         public Character Character { get; set; }
 

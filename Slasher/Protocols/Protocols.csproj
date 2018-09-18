@@ -4,17 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{130CC6BE-2E13-48C2-9E56-E5E85451954A}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{198C2075-221E-4005-8AFD-300B6BB9E64E}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Slasher.Server</RootNamespace>
-    <AssemblyName>Slasher.Server</AssemblyName>
+    <RootNamespace>Protocols</RootNamespace>
+    <AssemblyName>Protocols</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,23 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Protocol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerInterface.cs" />
-    <Compile Include="ServerLogic.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Protocols\Protocols.csproj">
-      <Project>{198C2075-221E-4005-8AFD-300B6BB9E64E}</Project>
-      <Name>Protocols</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Slasher.Entities\Slasher.Entities.csproj">
-      <Project>{3DDE6871-4FCF-42CD-855C-3978612A77B2}</Project>
-      <Name>Slasher.Entities</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

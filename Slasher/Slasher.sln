@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slasher.Client", "Slasher.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slasher.Server", "Slasher.Server\Slasher.Server.csproj", "{130CC6BE-2E13-48C2-9E56-E5E85451954A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Protocols", "Protocols\Protocols.csproj", "{198C2075-221E-4005-8AFD-300B6BB9E64E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{130CC6BE-2E13-48C2-9E56-E5E85451954A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{130CC6BE-2E13-48C2-9E56-E5E85451954A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{130CC6BE-2E13-48C2-9E56-E5E85451954A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{198C2075-221E-4005-8AFD-300B6BB9E64E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{198C2075-221E-4005-8AFD-300B6BB9E64E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{198C2075-221E-4005-8AFD-300B6BB9E64E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{198C2075-221E-4005-8AFD-300B6BB9E64E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

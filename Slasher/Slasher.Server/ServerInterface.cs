@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +12,7 @@ namespace Slasher.Server
     {
         private ServerLogic ServerLogic { get; set; }
 
+
         public ServerInterface()
         {
             ServerLogic = new ServerLogic();
@@ -19,7 +21,8 @@ namespace Slasher.Server
         public void Start()
         {
             Console.WriteLine("Bienvenido al sistema Slasher Servidor!");
-            ShowMainMenu();
+            // ShowMainMenu();
+            ServerLogic.ConnectServer();
         }
 
         private void ShowMainMenu()
@@ -120,7 +123,8 @@ namespace Slasher.Server
                         if (ServerLogic.CanStartMatch())
                         {
                             ServerLogic.StartMatch();
-                        }else
+                        }
+                        else
                         {
                             Console.WriteLine("Ya existe una partida activa");
                         }

@@ -75,7 +75,7 @@ namespace Slasher.Client
             string nickname = Console.ReadLine();
             Console.WriteLine("Ingrese un avatar (nombre)");
             string avatar = Console.ReadLine();
-            bool added = clientLogic.createUser(nickname, avatar);
+            bool added = clientLogic.connect(nickname, "192.168.1.49", 6000);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
