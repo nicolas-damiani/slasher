@@ -15,10 +15,22 @@ namespace Slasher.Entities
         public bool Active { get; set; }
         public Timer Timer { get; set; }
         public enum Move { UP, DOWN, LEFT, RIGHT, UPRIGHT, UPLEFT, DOWNRIGHT, DOWNLEFT }
+        public static Dictionary<string, Move> MovementCommands;
         private const int FIRST_ROW = 0;
         private const int LAST_ROW = 7;
         private const int FIRST_COL = 0;
         private const int LAST_COL = 7;
+
+        public Match()
+        {
+            MovementCommands = new Dictionary<string, Move>()
+            {
+                { "arriba", Move.UP},
+                { "abajo", Move.DOWN},
+                { "izquierda", Move.LEFT},
+                { "derecha", Move.RIGHT}
+            };
+        }
 
         public void StartMatch(List<User> users)
         {
@@ -61,7 +73,7 @@ namespace Slasher.Entities
             }
         }
 
-        private void MovePlayer(User user, Move move)
+        public void MovePlayer(User user, Move move)
         {
             Tuple<int, int> position = FindUserPosition(user);
             IsValidMove(user, position, move);

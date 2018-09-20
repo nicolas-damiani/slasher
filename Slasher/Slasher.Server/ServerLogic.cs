@@ -15,15 +15,18 @@ namespace Slasher.Server
     {
         public Match Match { get; set; }
         private List<TcpClient> TcpClients { get; set; }
-        private List<User> RegisteredUsers { get; set; }
+        private Dictionary<TcpClient, User> RegisteredUsers { get; set; }
+        public bool Connected { get; set; }
 
 
         public ServerLogic()
         {
             TcpClients = new List<TcpClient>();
             Match = new Match();
-            RegisteredUsers = new List<User>();
+            RegisteredUsers = new Dictionary<TcpClient, User>();
         }
+
+
         internal List<User> GetPossibleUsersToAdd()
         {
             throw new NotImplementedException();
@@ -41,7 +44,7 @@ namespace Slasher.Server
             listener = new TcpListener(ipAddress, 6000);
             Console.WriteLine("local ip address: " + ipAddress);
             listener.Start();
-            while (true)
+            while ( )
             {
                 try
                 {
@@ -59,7 +62,7 @@ namespace Slasher.Server
         private void receiveCommands(TcpClient client)
         {
             string userName = "";
-            while (true)
+            while (Connected)
             {
                 byte[] headerInformation = new byte[9];
                 headerInformation = Protocol.GetData(client, 9);
@@ -80,22 +83,22 @@ namespace Slasher.Server
             {
                 case 01://cliente se conecta
                     string name = UnicodeEncoding.ASCII.GetString(data);
-
-                    
-
-                    sendAuthorizatonData(name, nws);
-                    
+                    sendAuthorizatonData(name, nws,client);
+                    break;
+                case 10:
+                    string movement = UnicodeEncoding.ASCII.GetString(data);
+                    Match.MovePlayer(RegisteredUsers[client], Match.MovementCommands[movement]);
                     break;
             };
         }
 
-        private void sendAuthorizatonData(string data, NetworkStream nws)
+        private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client)
         {
             User user = new User(data, "");
             byte[] responseStream;
-            if (!RegisteredUsers.Contains(user))
+            if (!RegisteredUsers.ContainsValue(user))
             {
-                RegisteredUsers.Add(user);
+                RegisteredUsers.Add(client, user);
                 responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
             }
             else
@@ -123,7 +126,7 @@ namespace Slasher.Server
         internal void StartMatch()
         {
             Match = new Match();
-            Match.StartMatch();
+        //    Match.StartMatch();
         }
     }
 }

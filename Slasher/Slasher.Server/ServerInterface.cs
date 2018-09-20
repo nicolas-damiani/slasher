@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Slasher.Server
@@ -21,9 +22,13 @@ namespace Slasher.Server
         public void Start()
         {
             Console.WriteLine("Bienvenido al sistema Slasher Servidor!");
-            // ShowMainMenu();
-            ServerLogic.ConnectServer();
+
+            Thread acceptConnections = new Thread(() => ServerLogic.ConnectServer());
+            string exitCommand = Console.ReadLine();
+            ServerLogic.Connected = false;
         }
+
+
 
         private void ShowMainMenu()
         {

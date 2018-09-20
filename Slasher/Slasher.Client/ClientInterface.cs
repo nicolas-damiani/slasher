@@ -56,8 +56,9 @@ namespace Slasher.Client
                     case 1:
                         registerUser();
                         break;
-                    case 3
+                    case 3:
                         sendMovement();
+                        break;
                     default:
                         Console.WriteLine("Comando invalido");
                         break;
@@ -94,7 +95,7 @@ namespace Slasher.Client
         {
             Console.WriteLine("Ingrese movimiento escribiendo el comando");
             string movement = Console.ReadLine();
-
+            clientLogic.SendMovement(movement);
         }
 
 
