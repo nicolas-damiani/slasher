@@ -18,7 +18,11 @@ namespace Slasher.Entities
             NickName = nickname;
             Avatar = avatar;
         }
-        
+
+        public User()
+        {
+        }
+
         public override bool Equals(object objectToCompare)
         {
             if (objectToCompare == null || !objectToCompare.GetType().Equals(this.GetType()))
