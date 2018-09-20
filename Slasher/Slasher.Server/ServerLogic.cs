@@ -17,6 +17,7 @@ namespace Slasher.Server
         private List<TcpClient> TcpClients { get; set; }
         private Dictionary<TcpClient, User> RegisteredUsers { get; set; }
         public bool Connected { get; set; }
+        private TcpListener Listener;
 
 
         public ServerLogic()
@@ -26,6 +27,16 @@ namespace Slasher.Server
             RegisteredUsers = new Dictionary<TcpClient, User>();
         }
 
+        internal void ShutDownConnections()
+        {
+            Listener.Stop();
+            foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
+            {
+                entry.Key.Close();
+                entry.Value.Connected = false;
+            }
+            Connected = false;
+        }
 
         internal List<User> GetPossibleUsersToAdd()
         {
@@ -39,19 +50,16 @@ namespace Slasher.Server
 
         internal void ConnectServer()
         {
-            TcpListener listener;
             IPAddress ipAddress = IPAddress.Parse("192.168.1.53");
-            listener = new TcpListener(ipAddress, 6000);
+            Listener = new TcpListener(ipAddress, 6000);
             Console.WriteLine("local ip address: " + ipAddress);
-            listener.Start();
-            while ( )
+            Listener.Start();
+            while ( Connected )
             {
                 try
                 {
-                    TcpClient tcpClient = listener.AcceptTcpClient();
+                    TcpClient tcpClient = Listener.AcceptTcpClient();
                     TcpClients.Add(tcpClient);
-
-                    //tirar cliente en hilo
                     Thread clientThread = new Thread(() => receiveCommands(tcpClient));
                     clientThread.Start();
                 }
@@ -61,17 +69,21 @@ namespace Slasher.Server
 
         private void receiveCommands(TcpClient client)
         {
-            string userName = "";
-            while (Connected)
+            User user = new User();
+            while (user.Connected)
             {
                 byte[] headerInformation = new byte[9];
                 headerInformation = Protocol.GetData(client, 9);
                 if (headerInformation != null)
-                    executeCommand(headerInformation, client, ref userName);
+                    executeCommand(headerInformation, client, ref user);
+                else
+                {
+                    user.Connected = false;
+                }
             }
         }
 
-        private void executeCommand(byte[] headerInformation, TcpClient client, ref string userName)
+        private void executeCommand(byte[] headerInformation, TcpClient client, ref User user)
         {
             NetworkStream nws = client.GetStream();
             int dataLength = Protocol.GetDataLength(headerInformation);
@@ -81,9 +93,10 @@ namespace Slasher.Server
 
             switch (command)
             {
-                case 01://cliente se conecta
+                case 01:
                     string name = UnicodeEncoding.ASCII.GetString(data);
-                    sendAuthorizatonData(name, nws,client);
+                    user.NickName = name;
+                    sendAuthorizatonData(name, nws,client, ref user);
                     break;
                 case 10:
                     string movement = UnicodeEncoding.ASCII.GetString(data);
@@ -92,9 +105,8 @@ namespace Slasher.Server
             };
         }
 
-        private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client)
+        private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client, ref User user)
         {
-            User user = new User(data, "");
             byte[] responseStream;
             if (!RegisteredUsers.ContainsValue(user))
             {

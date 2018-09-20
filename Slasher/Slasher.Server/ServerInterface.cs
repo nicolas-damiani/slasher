@@ -25,7 +25,7 @@ namespace Slasher.Server
 
             Thread acceptConnections = new Thread(() => ServerLogic.ConnectServer());
             string exitCommand = Console.ReadLine();
-            ServerLogic.Connected = false;
+            ServerLogic.ShutDownConnections();
         }
 
 
