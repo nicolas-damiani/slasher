@@ -20,6 +20,7 @@ namespace Slasher.Entities
         private const int LAST_ROW = 7;
         private const int FIRST_COL = 0;
         private const int LAST_COL = 7;
+        private readonly object lockMap = new object();
 
         public Match()
         {
@@ -32,17 +33,17 @@ namespace Slasher.Entities
             };
         }
 
-        public void StartMatch(List<User> users)
+        public void StartMatch()
         {
-            Users = users;
+            Users = new List<User>();
             Map = new User[8, 8];
-            InitializeMap(users);
+            InitializeMap();
             Active = true;
             Timer = new Timer(180000);
             Timer.Start();
         }
 
-        private void InitializeMap(List<User> users)
+        private void InitializeMap()
         {
             for (int i = 0; i < 8; i++)
             {
@@ -51,13 +52,14 @@ namespace Slasher.Entities
                     Map.SetValue(null, i, j);
                 }
             }
-            foreach (User user in users)
-            {
-                SetUserPosition(user);
-            }
         }
 
-        private void SetUserPosition(User user)
+        public void AddUserToMatch(User user)
+        {
+            SetUserRandomPosition(user);
+        }
+
+        private void SetUserRandomPosition(User user)
         {
             Random random = new Random();
             bool assigned = false;
@@ -65,23 +67,32 @@ namespace Slasher.Entities
             {
                 int row = random.Next(0, 7);
                 int col = random.Next(0, 7);
-                if (Map[row, col] == null)
+                lock (lockMap)
                 {
-                    Map[row, col] = user;
-                    assigned = true;
+                    if (Map[row, col] == null)
+                    {
+                        Tuple<int, int> position = new Tuple<int, int>(row, col);
+                        SetUserPosition(user, position);
+                        assigned = true;
+                    }
                 }
             }
+        }
+
+        private void SetUserPosition(User user, Tuple<int, int> position)
+        {
+            Map[position.Item1, position.Item2] = user;
         }
 
         public void MovePlayer(User user, Move move)
         {
             Tuple<int, int> position = FindUserPosition(user);
-            IsValidMove(user, position, move);
-        }
-
-        private void IsValidMove(User user, Tuple<int, int> position, Move move)
-        {
             MoveInsideBounds(position, move);
+            lock (lockMap)
+            {
+                IsEmptySlot(user, position, move);
+                MovePlayerTile(user, position, move);
+            }
         }
 
         private void MoveInsideBounds(Tuple<int, int> position, Move move)
@@ -105,7 +116,57 @@ namespace Slasher.Entities
                         throw new BoundsException();
                     break;
                 default:
-                    throw new BoundsException();
+                    throw new InvalidMoveException();
+            }
+        }
+
+        private void IsEmptySlot(User user, Tuple<int, int> position, Move move)
+        {
+            switch (move)
+            {
+                case Move.UP:
+                    if (Map[position.Item1 - 1, position.Item2] != null)
+                        throw new OccupiedSlotException();
+                    break;
+                case Move.DOWN:
+                    if (Map[position.Item1 + 1, position.Item2] != null)
+                        throw new OccupiedSlotException();
+                    break;
+                case Move.RIGHT:
+                    if (Map[position.Item1, position.Item2 + 1] != null)
+                        throw new OccupiedSlotException();
+                    break;
+                case Move.LEFT:
+                    if (Map[position.Item1, position.Item2 - 1] != null)
+                        throw new OccupiedSlotException();
+                    break;
+                default:
+                    throw new InvalidMoveException();
+            }
+        }
+
+        private void MovePlayerTile(User user, Tuple<int, int> position, Move move)
+        {
+            switch (move)
+            {
+                case Move.UP:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1 - 1, position.Item2] = user;
+                    break;
+                case Move.DOWN:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1 + 1, position.Item2] = user;
+                    break;
+                case Move.RIGHT:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1, position.Item2 + 1] = user;
+                    break;
+                case Move.LEFT:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1, position.Item2 - 1] = user;
+                    break;
+                default:
+                    throw new InvalidMoveException();
             }
         }
 
@@ -122,5 +183,7 @@ namespace Slasher.Entities
             }
             return returnTuple;
         }
+
+
     }
 }
