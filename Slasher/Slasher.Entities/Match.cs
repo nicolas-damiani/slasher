@@ -14,8 +14,8 @@ namespace Slasher.Entities
         public User[,] Map { get; set; }
         public bool Active { get; set; }
         public Timer Timer { get; set; }
-        public enum Move { UP, DOWN, LEFT, RIGHT, UPRIGHT, UPLEFT, DOWNRIGHT, DOWNLEFT }
-        public static Dictionary<string, Move> MovementCommands;
+        public enum Direction { UP, DOWN, LEFT, RIGHT }
+        public static Dictionary<string, Direction> MovementCommands;
         private const int FIRST_ROW = 0;
         private const int LAST_ROW = 7;
         private const int FIRST_COL = 0;
@@ -24,12 +24,12 @@ namespace Slasher.Entities
 
         public Match()
         {
-            MovementCommands = new Dictionary<string, Move>()
+            MovementCommands = new Dictionary<string, Direction>()
             {
-                { "arriba", Move.UP},
-                { "abajo", Move.DOWN},
-                { "izquierda", Move.LEFT},
-                { "derecha", Move.RIGHT}
+                { "arriba", Direction.UP},
+                { "abajo", Direction.DOWN},
+                { "izquierda", Direction.LEFT},
+                { "derecha", Direction.RIGHT}
             };
         }
 
@@ -84,7 +84,7 @@ namespace Slasher.Entities
             Map[position.Item1, position.Item2] = user;
         }
 
-        public void MovePlayer(User user, Move move)
+        public void MovePlayer(User user, Direction move)
         {
             Tuple<int, int> position = FindUserPosition(user);
             MoveInsideBounds(position, move);
@@ -95,23 +95,23 @@ namespace Slasher.Entities
             }
         }
 
-        private void MoveInsideBounds(Tuple<int, int> position, Move move)
+        private void MoveInsideBounds(Tuple<int, int> position, Direction move)
         {
             switch (move)
             {
-                case Move.UP:
+                case Direction.UP:
                     if (position.Item1 == FIRST_ROW)
                         throw new BoundsException();
                     break;
-                case Move.DOWN:
+                case Direction.DOWN:
                     if (position.Item1 == LAST_ROW)
                         throw new BoundsException();
                     break;
-                case Move.RIGHT:
+                case Direction.RIGHT:
                     if (position.Item2 == LAST_COL)
                         throw new BoundsException();
                     break;
-                case Move.LEFT:
+                case Direction.LEFT:
                     if (position.Item2 == FIRST_COL)
                         throw new BoundsException();
                     break;
@@ -120,23 +120,23 @@ namespace Slasher.Entities
             }
         }
 
-        private void IsEmptySlot(User user, Tuple<int, int> position, Move move)
+        private void IsEmptySlot(User user, Tuple<int, int> position, Direction move)
         {
             switch (move)
             {
-                case Move.UP:
+                case Direction.UP:
                     if (Map[position.Item1 - 1, position.Item2] != null)
                         throw new OccupiedSlotException();
                     break;
-                case Move.DOWN:
+                case Direction.DOWN:
                     if (Map[position.Item1 + 1, position.Item2] != null)
                         throw new OccupiedSlotException();
                     break;
-                case Move.RIGHT:
+                case Direction.RIGHT:
                     if (Map[position.Item1, position.Item2 + 1] != null)
                         throw new OccupiedSlotException();
                     break;
-                case Move.LEFT:
+                case Direction.LEFT:
                     if (Map[position.Item1, position.Item2 - 1] != null)
                         throw new OccupiedSlotException();
                     break;
@@ -145,23 +145,23 @@ namespace Slasher.Entities
             }
         }
 
-        private void MovePlayerTile(User user, Tuple<int, int> position, Move move)
+        private void MovePlayerTile(User user, Tuple<int, int> position, Direction direction)
         {
-            switch (move)
+            switch (direction)
             {
-                case Move.UP:
+                case Direction.UP:
                     Map[position.Item1, position.Item2] = null;
                     Map[position.Item1 - 1, position.Item2] = user;
                     break;
-                case Move.DOWN:
+                case Direction.DOWN:
                     Map[position.Item1, position.Item2] = null;
                     Map[position.Item1 + 1, position.Item2] = user;
                     break;
-                case Move.RIGHT:
+                case Direction.RIGHT:
                     Map[position.Item1, position.Item2] = null;
                     Map[position.Item1, position.Item2 + 1] = user;
                     break;
-                case Move.LEFT:
+                case Direction.LEFT:
                     Map[position.Item1, position.Item2] = null;
                     Map[position.Item1, position.Item2 - 1] = user;
                     break;
@@ -182,6 +182,11 @@ namespace Slasher.Entities
                 }
             }
             return returnTuple;
+        }
+
+        public void PlayerAttack(User user, Direction direction)
+        {
+
         }
 
 
