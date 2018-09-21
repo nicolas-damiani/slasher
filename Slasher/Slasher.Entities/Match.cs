@@ -84,20 +84,20 @@ namespace Slasher.Entities
             Map[position.Item1, position.Item2] = user;
         }
 
-        public void MovePlayer(User user, Direction move)
+        public void MovePlayer(User user, Direction direction)
         {
             Tuple<int, int> position = FindUserPosition(user);
-            MoveInsideBounds(position, move);
+            MoveInsideBounds(position, direction);
             lock (lockMap)
             {
-                IsEmptySlot(user, position, move);
-                MovePlayerTile(user, position, move);
+                IsEmptySlot(user, position, direction);
+                MovePlayerTile(user, position, direction);
             }
         }
 
-        private void MoveInsideBounds(Tuple<int, int> position, Direction move)
+        private void MoveInsideBounds(Tuple<int, int> position, Direction direction)
         {
-            switch (move)
+            switch (direction)
             {
                 case Direction.UP:
                     if (position.Item1 == FIRST_ROW)
@@ -120,9 +120,9 @@ namespace Slasher.Entities
             }
         }
 
-        private void IsEmptySlot(User user, Tuple<int, int> position, Direction move)
+        private void IsEmptySlot(User user, Tuple<int, int> position, Direction direction)
         {
-            switch (move)
+            switch (direction)
             {
                 case Direction.UP:
                     if (Map[position.Item1 - 1, position.Item2] != null)
@@ -186,7 +186,7 @@ namespace Slasher.Entities
 
         public void PlayerAttack(User user, Direction direction)
         {
-
+            
         }
 
 
