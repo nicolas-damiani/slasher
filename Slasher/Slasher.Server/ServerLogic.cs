@@ -18,6 +18,7 @@ namespace Slasher.Server
         private Dictionary<TcpClient, User> RegisteredUsers { get; set; }
         public bool Connected { get; set; }
         private TcpListener Listener;
+        private object registrationLock;
 
 
         public ServerLogic()
@@ -25,6 +26,10 @@ namespace Slasher.Server
             TcpClients = new List<TcpClient>();
             Match = new Match();
             RegisteredUsers = new Dictionary<TcpClient, User>();
+            registrationLock = new object();
+            Match = new Match();
+            Match.StartMatch();
+
         }
 
         internal void ShutDownConnections()
@@ -108,14 +113,17 @@ namespace Slasher.Server
         private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client, ref User user)
         {
             byte[] responseStream;
-            if (!RegisteredUsers.ContainsValue(user))
+            lock (registrationLock)
             {
-                RegisteredUsers.Add(client, user);
-                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
-            }
-            else
-            {
-                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "400");
+                if (!RegisteredUsers.ContainsValue(user))
+                {
+                    RegisteredUsers.Add(client, user);
+                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
+                }
+                else
+                {
+                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "400");
+                }
             }
             nws.Write(responseStream, 0, responseStream.Length);
         }
@@ -133,12 +141,6 @@ namespace Slasher.Server
         internal bool CanStartMatch()
         {
             return !Match.Active;
-        }
-
-        internal void StartMatch()
-        {
-            Match = new Match();
-        //    Match.StartMatch();
         }
     }
 }
