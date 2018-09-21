@@ -42,7 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoundsException.cs" />
+    <Compile Include="AttackOutOfBoundsException.cs" />
+    <Compile Include="EmptyAttackTargetException.cs" />
+    <Compile Include="MoveOutOfBoundsException.cs" />
+    <Compile Include="InvalidAttackException.cs" />
+    <Compile Include="InvalidMoveException.cs" />
+    <Compile Include="OccupiedSlotException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

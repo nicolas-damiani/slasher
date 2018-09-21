@@ -101,19 +101,19 @@ namespace Slasher.Entities
             {
                 case Direction.UP:
                     if (position.Item1 == FIRST_ROW)
-                        throw new BoundsException();
+                        throw new MoveOutOfBoundsException();
                     break;
                 case Direction.DOWN:
                     if (position.Item1 == LAST_ROW)
-                        throw new BoundsException();
+                        throw new MoveOutOfBoundsException();
                     break;
                 case Direction.RIGHT:
                     if (position.Item2 == LAST_COL)
-                        throw new BoundsException();
+                        throw new MoveOutOfBoundsException();
                     break;
                 case Direction.LEFT:
                     if (position.Item2 == FIRST_COL)
-                        throw new BoundsException();
+                        throw new MoveOutOfBoundsException();
                     break;
                 default:
                     throw new InvalidMoveException();
@@ -186,9 +186,88 @@ namespace Slasher.Entities
 
         public void PlayerAttack(User user, Direction direction)
         {
-            
+            Tuple<int, int> position = FindUserPosition(user);
+            AttackInsideBounds(position, direction);
+            lock (lockMap)
+            {
+                AttackTarget(user, position, direction);
+            }
         }
 
+        private void AttackInsideBounds(Tuple<int, int> position, Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.UP:
+                    if (position.Item1 == FIRST_ROW)
+                        throw new AttackOutOfBoundsException();
+                    break;
+                case Direction.DOWN:
+                    if (position.Item1 == LAST_ROW)
+                        throw new AttackOutOfBoundsException();
+                    break;
+                case Direction.RIGHT:
+                    if (position.Item2 == LAST_COL)
+                        throw new AttackOutOfBoundsException();
+                    break;
+                case Direction.LEFT:
+                    if (position.Item2 == FIRST_COL)
+                        throw new AttackOutOfBoundsException();
+                    break;
+                default:
+                    throw new InvalidAttackException();
+            }
+        }
 
+        private void AttackTarget(User user, Tuple<int, int> position, Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.UP:
+                    if (Map[position.Item1 - 1, position.Item2] != null)
+                    {
+                        Tuple<int, int> targetPosition = new Tuple<int, int>(position.Item1 - 1, position.Item2);
+                        ApplyAttack(user, targetPosition);
+                    }
+                    else
+                    {
+                        throw new EmptyAttackTargetException();
+                    }
+                    break;
+                case Direction.DOWN:
+                    if (position.Item1 == LAST_ROW)
+                        throw new EmptyAttackTargetException();
+                    break;
+                case Direction.RIGHT:
+                    if (position.Item2 == LAST_COL)
+                        throw new EmptyAttackTargetException();
+                    break;
+                case Direction.LEFT:
+                    if (position.Item2 == FIRST_COL)
+                        throw new EmptyAttackTargetException();
+                    break;
+                default:
+                    throw new InvalidAttackException();
+            }
+        }
+
+        private void ApplyAttack(User user, Tuple<int, int> targetPosition)
+        {
+            User targetUser = GetUserByPosition(targetPosition);
+            switch (user.Character.GetType())
+            {
+                //case CharacterType.MONSTER:
+                //    Console.WriteLine("monstruo");
+                //    break;
+                //case CharacterType.SURVIVOR:
+                //    Console.WriteLine("sobreviviente");
+                //    break;
+            }
+        }
+
+        private User GetUserByPosition(Tuple<int, int> targetPosition)
+        {
+            return Map[targetPosition.Item1, targetPosition.Item2];
+        }
     }
 }
