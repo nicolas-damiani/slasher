@@ -17,10 +17,12 @@ namespace Slasher.Entities
         {
             NickName = nickname;
             Avatar = avatar;
+            Connected = true;
         }
 
         public User()
         {
+            Connected = true;
         }
 
         public override bool Equals(object objectToCompare)

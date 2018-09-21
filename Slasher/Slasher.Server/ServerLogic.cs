@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using Protocols;
+using System.IO;
 
 namespace Slasher.Server
 {
@@ -17,6 +18,7 @@ namespace Slasher.Server
         private List<TcpClient> TcpClients { get; set; }
         private Dictionary<TcpClient, User> RegisteredUsers { get; set; }
         public bool Connected { get; set; }
+        private static string startupPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Archivos";
         private TcpListener Listener;
         private object registrationLock;
 
@@ -55,11 +57,12 @@ namespace Slasher.Server
 
         internal void ConnectServer()
         {
-            IPAddress ipAddress = IPAddress.Parse("192.168.1.53");
+            IPAddress ipAddress = IPAddress.Parse("172.29.3.25");
             Listener = new TcpListener(ipAddress, 6000);
+            Connected = true;
             Console.WriteLine("local ip address: " + ipAddress);
             Listener.Start();
-            while ( Connected )
+            while (Connected)
             {
                 try
                 {
@@ -77,8 +80,8 @@ namespace Slasher.Server
             User user = new User();
             while (user.Connected)
             {
-                byte[] headerInformation = new byte[9];
-                headerInformation = Protocol.GetData(client, 9);
+                byte[] headerInformation = new byte[Protocol.HEADER_SIZE + 5];
+                headerInformation = Protocol.GetData(client, Protocol.HEADER_SIZE + 5);
                 if (headerInformation != null)
                     executeCommand(headerInformation, client, ref user);
                 else
@@ -101,13 +104,42 @@ namespace Slasher.Server
                 case 01:
                     string name = UnicodeEncoding.ASCII.GetString(data);
                     user.NickName = name;
-                    sendAuthorizatonData(name, nws,client, ref user);
+                    sendAuthorizatonData(name, nws, client, ref user);
                     break;
                 case 10:
                     string movement = UnicodeEncoding.ASCII.GetString(data);
                     Match.MovePlayer(RegisteredUsers[client], Match.MovementCommands[movement]);
                     break;
+                case 20:
+                    downloadFile("nico.png", data);
+                    sendFileResponse(nws);
+                    break;
+                case 35:
+                    joinMatch(RegisteredUsers[client], nws);
+                    break;
             };
+        }
+
+        private void joinMatch(User user, NetworkStream nws)
+        {
+            byte[] responseStream;
+            if (Match.Active)
+            {
+                if (!Match.Users.Contains(user))
+                {
+                    Match.AddUserToMatch(user);
+                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "35", "200");
+                }else
+                {
+
+                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "35", "200");
+                }
+            }
+            else
+            {
+                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "35", "400");
+            }
+            nws.Write(responseStream, 0, responseStream.Length);
         }
 
         private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client, ref User user)
@@ -128,6 +160,13 @@ namespace Slasher.Server
             nws.Write(responseStream, 0, responseStream.Length);
         }
 
+        private void sendFileResponse(NetworkStream nws)
+        {
+            byte[] responseStream;
+            responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
+            nws.Write(responseStream, 0, responseStream.Length);
+        }
+
         internal List<User> GetRegisteredUsers()
         {
             throw new NotImplementedException();
@@ -141,6 +180,42 @@ namespace Slasher.Server
         internal bool CanStartMatch()
         {
             return !Match.Active;
+        }
+
+        public static void SaveBytesToFile(string filename, byte[] bytesToWrite)
+        {
+            filename = "C:\\Users\\Usuario\\Desktop";
+            if (filename != null && filename.Length > 0 && bytesToWrite != null)
+            {
+                if (!Directory.Exists(Path.GetDirectoryName(filename)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(filename));
+
+                FileStream file = File.Create(filename);
+
+                file.Write(bytesToWrite, 0, bytesToWrite.Length);
+
+                file.Close();
+            }
+        }
+
+        private static void downloadFile(string name, byte[] fileData)
+        {
+            name = "nico.png";
+            /*  if (File.Exists(startupPath + "\\" + name))
+              {
+                  File.Delete(startupPath + "\\" + name);
+              }
+              FileStream fs = File.Create(startupPath + "\\" + name);
+              fs.Write(fileData, 0, fileData.Length);
+              fs.Close();
+              */
+            MemoryStream stream = new MemoryStream(fileData);
+            using (FileStream fileStream = File.Create(startupPath + "\\" + name, (int)stream.Length))
+            {
+                byte[] bytesInStream = new byte[stream.Length];
+                stream.Read(bytesInStream, 0, bytesInStream.Length);
+                fileStream.Write(bytesInStream, 0, bytesInStream.Length);
+            }
         }
     }
 }
