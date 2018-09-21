@@ -13,6 +13,7 @@ namespace Slasher.Client
     {
 
         public TcpClient TcpClient { get; set; }
+        private bool Connected { get; set; }
 
 
 

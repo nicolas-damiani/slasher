@@ -35,33 +35,34 @@ namespace Protocols
 
         public static byte[] GetData(TcpClient tcpClient, int size)
         {
-              int bufferSize = tcpClient.ReceiveBufferSize;
-              NetworkStream dataStream = tcpClient.GetStream();
-              byte[] data = new byte[size];
-              int pos = 0;
-              int currentData = 0;
-              
-              while (pos < size)
-              {
-                  try
-                  {
-                      currentData = dataStream.Read(data, pos, size - pos);
-                      pos += currentData;
-                      if (currentData == 0)
-                      {
-                          tcpClient.Close();
-                          data = null;
-                      }
-                  }
-                  catch (Exception e)
-                  {
-                      Console.WriteLine(e.Message);
-                      tcpClient.Close();
-                      return null;
-                  }
-              }
-              return data;
-    }
+            int bufferSize = tcpClient.ReceiveBufferSize;
+            NetworkStream dataStream = tcpClient.GetStream();
+            byte[] data = new byte[size];
+            int pos = 0;
+            int currentData = 0;
+
+            while (pos < size)
+            {
+                try
+                {
+                    currentData = dataStream.Read(data, pos, size - pos);
+                    pos += currentData;
+                    if (currentData == 0)
+                    {
+                        dataStream.Close();
+                        tcpClient.Close();
+                        data = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    tcpClient.Close();
+                    return null;
+                }
+            }
+            return data;
+        }
 
 
         public static int getCommandAction(byte[] stream)
@@ -82,11 +83,12 @@ namespace Protocols
 
         public static byte[] GenerateStream(SendType type, string command, string data)
         {
-            string request = ""; 
+            string request = "";
             if (type == SendType.REQUEST)
             {
                 request += "REQ";
-            }else
+            }
+            else
             {
                 request += "RES";
             }
