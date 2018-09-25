@@ -24,6 +24,7 @@ namespace Slasher.Server
             Console.WriteLine("Bienvenido al sistema Slasher Servidor!");
 
             Thread acceptConnections = new Thread(() => ServerLogic.ConnectServer());
+            acceptConnections.Start();
             string exitCommand = Console.ReadLine();
             ServerLogic.ShutDownConnections();
         }
@@ -127,7 +128,7 @@ namespace Slasher.Server
                     case 5:
                         if (ServerLogic.CanStartMatch())
                         {
-                            ServerLogic.StartMatch();
+//                            ServerLogic.StartMatch();
                         }
                         else
                         {

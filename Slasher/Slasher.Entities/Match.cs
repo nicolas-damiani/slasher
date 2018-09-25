@@ -54,12 +54,12 @@ namespace Slasher.Entities
             }
         }
 
-        public void AddUserToMatch(User user)
+        public bool AddUserToMatch(User user)
         {
-            SetUserRandomPosition(user);
+            return SetUserRandomPosition(user);
         }
 
-        private void SetUserRandomPosition(User user)
+        private bool SetUserRandomPosition(User user)
         {
             Random random = new Random();
             bool assigned = false;
@@ -77,6 +77,7 @@ namespace Slasher.Entities
                     }
                 }
             }
+            return true;
         }
 
         private void SetUserPosition(User user, Tuple<int, int> position)

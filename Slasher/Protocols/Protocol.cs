@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -11,11 +12,12 @@ namespace Protocols
     {
 
         public enum SendType { REQUEST, RESPONSE }
+        public static int HEADER_SIZE = 7;
 
         public static byte[] getStreamAuthenticationUser(string name)
         {
             string dataSize = name.Length.ToString();
-            while (dataSize.Length < 4)
+            while (dataSize.Length < HEADER_SIZE)
             {
                 dataSize = "0" + dataSize;
             }
@@ -26,7 +28,7 @@ namespace Protocols
 
         public static string makeSizeText(string size)
         {
-            while (size.Length < 4)
+            while (size.Length < HEADER_SIZE)
             {
                 size = "0" + size;
             }
@@ -76,7 +78,7 @@ namespace Protocols
         public static int GetDataLength(byte[] data)
         {
             string result = System.Text.Encoding.ASCII.GetString(data);
-            string length = result.Substring(5, 4);
+            string length = result.Substring(5, HEADER_SIZE);
             int largoInt = Int32.Parse(length);
             return largoInt;
         }
@@ -105,10 +107,9 @@ namespace Protocols
         public static bool checkIfLogged(byte[] response)
         {
             string responseText = Encoding.ASCII.GetString(response);
-            string result = responseText.Substring(9, 3);
+            string result = responseText.Substring(HEADER_SIZE+ 5 , 3);
             if (result.Equals("200"))
             {
-                Console.WriteLine("connected");
                 return true;
             }
             else
@@ -116,6 +117,63 @@ namespace Protocols
                 Console.WriteLine("no connected");
                 return false;
             }
+        }
+
+        public static bool checkIfMatchFinished(byte[] response)
+        {
+            string responseText = Encoding.ASCII.GetString(response);
+            string result = responseText.Substring(HEADER_SIZE + 5, 3);
+            if (result.Equals("200"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool checkIfJoinedToMatch(byte[] response)
+        {
+            string responseText = Encoding.ASCII.GetString(response);
+            string result = responseText.Substring(HEADER_SIZE + 5, 3);
+            if (result.Equals("200"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        public static bool checkIfFileOk(byte [] response)
+        {
+            string responseText = Encoding.ASCII.GetString(response);
+            string result = responseText.Substring(5+HEADER_SIZE, 3);
+            if (result.Equals("200"))
+            {
+                Console.WriteLine("file saved");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("file not saved");
+                return false;
+            }
+        }
+
+        public static byte[] ReadFully(string input)
+        {
+            FileStream sourceFile = new FileStream(input, FileMode.Open, FileAccess.Read); //Open streamer
+            BinaryReader binReader = new BinaryReader(sourceFile);
+            byte[] output = new byte[sourceFile.Length]; //create byte array of size file
+            for (long i = 0; i < sourceFile.Length; i++)
+                output[i] = binReader.ReadByte(); //read until done
+            sourceFile.Close(); //dispose streamer
+            binReader.Close(); //dispose reader
+            return output;
         }
     }
 }

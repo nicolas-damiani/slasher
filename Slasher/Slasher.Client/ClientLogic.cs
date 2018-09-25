@@ -2,6 +2,7 @@
 using Slasher.Entities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -39,8 +40,8 @@ namespace Slasher.Client
             byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "01", name);
             clientStream.Write(data, 0, data.Length);
 
-            var response = new byte[12];
-            response = Protocol.GetData(TcpClient, 12);
+            var response = new byte[Protocol.HEADER_SIZE + 8];
+            response = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 8);
             if (response != null)
                 return Protocol.checkIfLogged(response);
             return false;
@@ -53,11 +54,52 @@ namespace Slasher.Client
             byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "10", movement);
             clientStream.Write(data, 0, data.Length);
 
-            var response = new byte[12];
-            response = Protocol.GetData(TcpClient, 12);
-        /*    if (response != null)
+            var response = new byte[Protocol.HEADER_SIZE + 8];
+            response = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 8);
+            /*    if (response != null)
+                    return Protocol.checkIfLogged(response);
+                return false;*/
+        }
+
+        public bool SendFile(string filePath)
+        {
+            byte[] stream = Protocol.ReadFully(filePath);
+            NetworkStream clientStream = TcpClient.GetStream();
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "20", System.Text.Encoding.ASCII.GetString(stream));
+            
+            clientStream.Write(data, 0, data.Length);
+
+            var response = new byte[Protocol.HEADER_SIZE + 8];
+            response = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 8);
+            if (response != null)
                 return Protocol.checkIfLogged(response);
-            return false;*/
+            return false;
+        }
+
+        internal bool CheckGameStatus()
+        {
+            NetworkStream clientStream = TcpClient.GetStream();
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "40", "");
+            clientStream.Write(data, 0, data.Length);
+
+            var response = new byte[Protocol.HEADER_SIZE + 8];
+            response = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 8);
+            if (response != null)
+                return Protocol.checkIfMatchFinished(response);
+            return false;
+        }
+
+        internal bool JoinActiveMatch()
+        {
+            NetworkStream clientStream = TcpClient.GetStream();
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "35", "");
+            clientStream.Write(data, 0, data.Length);
+
+            var response = new byte[Protocol.HEADER_SIZE + 8];
+            response = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 8);
+            if (response != null)
+                return Protocol.checkIfJoinedToMatch(response);
+            return false;
         }
     }
 }
