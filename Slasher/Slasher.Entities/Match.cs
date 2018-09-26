@@ -22,6 +22,7 @@ namespace Slasher.Entities
         private const int LAST_COL = 7;
         private readonly object lockMap = new object();
         Thread timerThread;
+        public List<User> Winners { get; set; }
 
         public Match()
         {
@@ -37,20 +38,41 @@ namespace Slasher.Entities
         public void StartMatch()
         {
             Users = new List<User>();
+            Winners = new List<User>();
             Map = new User[8, 8];
             InitializeMap();
             Active = true;
-            timerThread  = new Thread(finishMatchByTime);
+            timerThread = new Thread(finishMatchByTime);
             timerThread.Start();
         }
 
         private void finishMatchByTime()
         {
             Thread.Sleep(10000);
-            if (Active)
+            lock (lockMap)
             {
-                Active = false;
+                if (Active)
+                {
+                    Active = false;
+                    IsThereSurvivorsLeft();
+                }
             }
+        }
+
+        private void IsThereSurvivorsLeft()
+        {
+            bool survivorsWin = false;
+            List<User> aliveUsers = new List<User>();
+            foreach (User user in Users)
+            {
+                if (user.Character.IsAlive && user.Character.Type == CharacterType.SURVIVOR)
+                {
+                    survivorsWin = true;
+                    Winners.Add(user);
+                }
+            }
+            if (survivorsWin)
+                throw new SurvivorsWinException();
         }
 
         private void InitializeMap()
@@ -97,12 +119,103 @@ namespace Slasher.Entities
 
         public void MovePlayer(User user, Direction direction)
         {
-            Tuple<int, int> position = FindUserPosition(user);
-            MoveInsideBounds(position, direction);
             lock (lockMap)
             {
-                IsEmptySlot(user, position, direction);
-                MovePlayerTile(user, position, direction);
+                if (user.Turn < 2)
+                {
+                    Tuple<int, int> position = FindUserPosition(user);
+                    MoveInsideBounds(position, direction);
+                    IsEmptySlot(user, position, direction);
+                    MovePlayerTile(user, position, direction);
+                    user.Turn = user.Turn + 1;
+                    CheckFinishedMatch();
+                    ProcessAllTurns();
+                }
+                else
+                {
+                    throw new UserTurnLimitException();
+                }
+            }
+        }
+
+        private void CheckFinishedMatch()
+        {
+            if (BothTypeOfCharactersInGame())
+            {
+                OnlySurvivorsLeft();
+                OnlyOneMonsterLeft();
+            }
+        }
+
+        private void OnlyOneMonsterLeft()
+        {
+            List<User> aliveUsers = new List<User>();
+            foreach (User user in Users)
+            {
+                if (user.Character.IsAlive)
+                    aliveUsers.Add(user);
+            }
+            if (aliveUsers.Count == 1)
+            {
+                if (aliveUsers[0].Character.Type == CharacterType.MONSTER)
+                {
+                    Winners.Add(aliveUsers[0]);
+                    Active = false;
+                    throw new MonsterWinsException();
+                }
+            }
+        }
+
+        private void OnlySurvivorsLeft()
+        {
+            List<User> aliveUsers = new List<User>();
+            foreach (User user in Users)
+            {
+                if (user.Character.IsAlive)
+                    aliveUsers.Add(user);
+            }
+            bool allSurvivors = true;
+            foreach (User user in Users)
+            {
+                if (user.Character.Type == CharacterType.MONSTER)
+                    allSurvivors = false;
+            }
+            if (allSurvivors)
+            {
+                Winners = aliveUsers;
+                Active = false;
+                throw new SurvivorsWinException();
+            }
+        }
+
+        private bool BothTypeOfCharactersInGame()
+        {
+            bool survivor = false;
+            bool monster = false;
+            foreach (User user in Users)
+            {
+                if (user.Character.Type == CharacterType.MONSTER)
+                    monster = true;
+                if (user.Character.Type == CharacterType.SURVIVOR)
+                    survivor = true;
+            }
+            return monster && survivor;
+        }
+
+        private void ProcessAllTurns()
+        {
+            bool finishedRound = true;
+            foreach (User user in Users)
+            {
+                if (user.Turn < 2)
+                    finishedRound = false;
+            }
+            if (finishedRound)
+            {
+                foreach (User user in Users)
+                {
+                    user.Turn = 0;
+                }
             }
         }
 
@@ -197,15 +310,18 @@ namespace Slasher.Entities
                         returnTuple = new Tuple<int, int>(i, j);
                 }
             }
-            return returnTuple;
+            if (returnTuple != null)
+                return returnTuple;
+            else
+                throw new UserIsDeadException();
         }
 
         public void PlayerAttack(User user, Direction direction)
         {
-            Tuple<int, int> position = FindUserPosition(user);
-            AttackInsideBounds(position, direction);
             lock (lockMap)
             {
+                Tuple<int, int> position = FindUserPosition(user);
+                AttackInsideBounds(position, direction);
                 AttackTarget(user, position, direction);
             }
         }
@@ -270,15 +386,35 @@ namespace Slasher.Entities
         private void ApplyAttack(User user, Tuple<int, int> targetPosition)
         {
             User targetUser = GetUserByPosition(targetPosition);
-            switch (user.Character.GetType())
+            switch (user.Character.Type)
             {
-                //case CharacterType.MONSTER:
-                //    Console.WriteLine("monstruo");
-                //    break;
-                //case CharacterType.SURVIVOR:
-                //    Console.WriteLine("sobreviviente");
-                //    break;
+                case CharacterType.MONSTER:
+                    SubstractLifeFromAttackedUser(targetUser, Character.MONSTER_ATTACK);
+                    break;
+                case CharacterType.SURVIVOR:
+                    SubstractLifeFromAttackedUser(targetUser, Character.SURVIVOR_LIFE);
+                    break;
             }
+        }
+
+        private void SubstractLifeFromAttackedUser(User targetUser, int attackValue)
+        {
+            if (targetUser.Character.Life - attackValue > 0)
+            {
+                targetUser.Character.Life = targetUser.Character.Life - attackValue;
+            }
+            else
+            {
+                RemovePlayerFromMatch(targetUser);
+                targetUser.Character.IsAlive = false;
+            }
+        }
+
+        private void RemovePlayerFromMatch(User user)
+        {
+            Tuple<int, int> position = FindUserPosition(user);
+            Map[position.Item1, position.Item2] = null;
+            //VER SI HAY QUE NOTIFICAR A ALGUIEN
         }
 
         private User GetUserByPosition(Tuple<int, int> targetPosition)

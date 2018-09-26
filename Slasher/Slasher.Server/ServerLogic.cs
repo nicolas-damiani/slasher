@@ -119,18 +119,24 @@ namespace Slasher.Server
                     break;
                 case 40:
                     string movement = UnicodeEncoding.ASCII.GetString(data);
-                    movePlayer(nws, RegisteredUsers[client], movement);
+                    playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
                     break;
             };
         }
 
-        private void movePlayer(NetworkStream nws, User user, string direction)
+        private void playerAction(NetworkStream nws, User user, string direction, ActionType actionType)
         {
             try
             {
-                Match.MovePlayer(user, Match.MovementCommands[direction]);
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200");
-                nws.Write(responseStream, 0, responseStream.Length);
+                if (actionType == ActionType.MOVEMENT)
+                {
+                    Match.MovePlayer(user, Match.MovementCommands[direction]);
+                    byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200");
+                    nws.Write(responseStream, 0, responseStream.Length);
+                }else if(actionType == ActionType.ATTACK)
+                {
+                    //ATTACK
+                }
             }
             catch (OccupiedSlotException)
             {
