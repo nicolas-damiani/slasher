@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -13,7 +14,6 @@ namespace Slasher.Entities
         public List<User> Users { get; set; }
         public User[,] Map { get; set; }
         public bool Active { get; set; }
-        public Timer Timer { get; set; }
         public enum Direction { UP, DOWN, LEFT, RIGHT }
         public static Dictionary<string, Direction> MovementCommands;
         private const int FIRST_ROW = 0;
@@ -21,6 +21,7 @@ namespace Slasher.Entities
         private const int FIRST_COL = 0;
         private const int LAST_COL = 7;
         private readonly object lockMap = new object();
+        Thread timerThread;
 
         public Match()
         {
@@ -39,8 +40,17 @@ namespace Slasher.Entities
             Map = new User[8, 8];
             InitializeMap();
             Active = true;
-            Timer = new Timer(180000);
-            Timer.Start();
+            timerThread  = new Thread(finishMatchByTime);
+            timerThread.Start();
+        }
+
+        private void finishMatchByTime()
+        {
+            Thread.Sleep(10000);
+            if (Active)
+            {
+                Active = false;
+            }
         }
 
         private void InitializeMap()
@@ -148,27 +158,32 @@ namespace Slasher.Entities
 
         private void MovePlayerTile(User user, Tuple<int, int> position, Direction direction)
         {
-            switch (direction)
+            if (Active)
             {
-                case Direction.UP:
-                    Map[position.Item1, position.Item2] = null;
-                    Map[position.Item1 - 1, position.Item2] = user;
-                    break;
-                case Direction.DOWN:
-                    Map[position.Item1, position.Item2] = null;
-                    Map[position.Item1 + 1, position.Item2] = user;
-                    break;
-                case Direction.RIGHT:
-                    Map[position.Item1, position.Item2] = null;
-                    Map[position.Item1, position.Item2 + 1] = user;
-                    break;
-                case Direction.LEFT:
-                    Map[position.Item1, position.Item2] = null;
-                    Map[position.Item1, position.Item2 - 1] = user;
-                    break;
-                default:
-                    throw new InvalidMoveException();
+                switch (direction)
+                {
+                    case Direction.UP:
+                        Map[position.Item1, position.Item2] = null;
+                        Map[position.Item1 - 1, position.Item2] = user;
+                        break;
+                    case Direction.DOWN:
+                        Map[position.Item1, position.Item2] = null;
+                        Map[position.Item1 + 1, position.Item2] = user;
+                        break;
+                    case Direction.RIGHT:
+                        Map[position.Item1, position.Item2] = null;
+                        Map[position.Item1, position.Item2 + 1] = user;
+                        break;
+                    case Direction.LEFT:
+                        Map[position.Item1, position.Item2] = null;
+                        Map[position.Item1, position.Item2 - 1] = user;
+                        break;
+                    default:
+                        throw new InvalidMoveException();
+                }
             }
+            else
+                throw new EndOfMatchException();
         }
 
         private Tuple<int, int> FindUserPosition(User user)

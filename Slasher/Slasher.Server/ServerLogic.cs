@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading;
 using Protocols;
 using System.IO;
+using Exceptions;
 
 namespace Slasher.Server
 {
@@ -57,7 +58,7 @@ namespace Slasher.Server
 
         internal void ConnectServer()
         {
-            IPAddress ipAddress = IPAddress.Parse("172.29.3.25");
+            IPAddress ipAddress = IPAddress.Parse("192.168.1.125");
             Listener = new TcpListener(ipAddress, 6000);
             Connected = true;
             Console.WriteLine("local ip address: " + ipAddress);
@@ -107,17 +108,68 @@ namespace Slasher.Server
                     sendAuthorizatonData(name, nws, client, ref user);
                     break;
                 case 10:
-                    string movement = UnicodeEncoding.ASCII.GetString(data);
-                    Match.MovePlayer(RegisteredUsers[client], Match.MovementCommands[movement]);
-                    break;
-                case 20:
                     downloadFile("nico.png", data);
                     sendFileResponse(nws);
                     break;
-                case 35:
+                case 20:
                     joinMatch(RegisteredUsers[client], nws);
                     break;
+                case 30:
+                    respondWhenMatchFinishes(nws);
+                    break;
+                case 40:
+                    string movement = UnicodeEncoding.ASCII.GetString(data);
+                    movePlayer(nws, RegisteredUsers[client], movement);
+                    break;
             };
+        }
+
+        private void movePlayer(NetworkStream nws, User user, string direction)
+        {
+            try
+            {
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200");
+                nws.Write(responseStream, 0, responseStream.Length);
+                Match.MovePlayer(user, Match.MovementCommands[direction]);
+            }catch(OccupiedSlotException)
+            {
+                sendError(nws, "Ya existe un usuario en esa posición");
+            }
+            catch (InvalidMoveException)
+            {
+                sendError(nws, "El movimiento que quiere realizar es inválido");
+            }
+            catch (BoundsException)
+            {
+                sendError(nws, "El movimiento que quiere realizar esta fuera de los limites.");
+            }catch (EndOfMatchException)
+            {
+                sendError(nws, "La partida ha finalizado.");
+            }
+            catch (Exception)
+            {
+                sendError(nws, "Ocurrió un error inesperado.");
+            }
+        }
+
+        private void respondWhenMatchFinishes(NetworkStream nws)
+        {
+            Thread matchFinishesThread = new Thread(() => checkMatchFinalizes(nws));
+            matchFinishesThread.Start();
+        }
+
+        private void checkMatchFinalizes(NetworkStream nws)
+        {
+            while (Match.Active) { };
+            byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "31", "200");
+            nws.Write(responseStream, 0, responseStream.Length);
+        }
+
+
+        private void sendError(NetworkStream nws, string message)
+        {
+            byte[] errorData = Protocol.GenerateServerError(message);
+            nws.Write(errorData, 0, errorData.Length);
         }
 
         private void joinMatch(User user, NetworkStream nws)
@@ -128,18 +180,14 @@ namespace Slasher.Server
                 if (!Match.Users.Contains(user))
                 {
                     Match.AddUserToMatch(user);
-                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "35", "200");
-                }else
-                {
-
-                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "35", "200");
                 }
+                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "21", "200");
+                nws.Write(responseStream, 0, responseStream.Length);
             }
             else
             {
-                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "35", "400");
+                sendError(nws, "No existe actualmente una partida activa.");
             }
-            nws.Write(responseStream, 0, responseStream.Length);
         }
 
         private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client, ref User user)
@@ -163,7 +211,7 @@ namespace Slasher.Server
         private void sendFileResponse(NetworkStream nws)
         {
             byte[] responseStream;
-            responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
+            responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "11", "200");
             nws.Write(responseStream, 0, responseStream.Length);
         }
 

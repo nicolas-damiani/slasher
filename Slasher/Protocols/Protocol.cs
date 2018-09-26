@@ -13,6 +13,7 @@ namespace Protocols
 
         public enum SendType { REQUEST, RESPONSE }
         public static int HEADER_SIZE = 7;
+        public static string OkResponse = "200";
 
         public static byte[] getStreamAuthenticationUser(string name)
         {
@@ -107,7 +108,7 @@ namespace Protocols
         public static bool checkIfLogged(byte[] response)
         {
             string responseText = Encoding.ASCII.GetString(response);
-            string result = responseText.Substring(HEADER_SIZE+ 5 , 3);
+            string result = responseText.Substring(HEADER_SIZE + 5, 3);
             if (result.Equals("200"))
             {
                 return true;
@@ -148,10 +149,10 @@ namespace Protocols
         }
 
 
-        public static bool checkIfFileOk(byte [] response)
+        public static bool checkIfFileOk(byte[] response)
         {
             string responseText = Encoding.ASCII.GetString(response);
-            string result = responseText.Substring(5+HEADER_SIZE, 3);
+            string result = responseText.Substring(5 + HEADER_SIZE, 3);
             if (result.Equals("200"))
             {
                 Console.WriteLine("file saved");
@@ -162,6 +163,13 @@ namespace Protocols
                 Console.WriteLine("file not saved");
                 return false;
             }
+        }
+
+        public static byte[] GenerateServerError(string message)
+        {
+            string response;
+            response = "RES" + "99" + makeSizeText(message.Length + "") + message;
+            return stringToBytes(response);
         }
 
         public static byte[] ReadFully(string input)
@@ -175,5 +183,8 @@ namespace Protocols
             binReader.Close(); //dispose reader
             return output;
         }
+
+
+
     }
 }

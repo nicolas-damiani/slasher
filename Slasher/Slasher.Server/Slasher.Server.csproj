@@ -52,6 +52,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Exceptions\Exceptions.csproj">
+      <Project>{94BE0A53-D0AF-4277-895D-B3FD575F30B8}</Project>
+      <Name>Exceptions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Protocols\Protocols.csproj">
       <Project>{198C2075-221E-4005-8AFD-300B6BB9E64E}</Project>
       <Name>Protocols</Name>

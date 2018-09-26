@@ -1,4 +1,5 @@
-﻿using Slasher.Entities;
+﻿using Exceptions;
+using Slasher.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,15 @@ namespace Slasher.Client
     {
         private ClientLogic clientLogic;
         private bool Connected { get; set; }
-        bool InActiveMatch { get; set; }
+        private bool InActiveMatch { get; set; }
+        private string finalizedMatchError;
 
         public ClientInterface()
         {
             clientLogic = new ClientLogic();
             Connected = true;
+            InActiveMatch = false;
+            finalizedMatchError = "";
         }
 
         public void start()
@@ -90,29 +94,25 @@ namespace Slasher.Client
 
         private void menuGameSwitch(int option)
         {
-            try
+            switch (option)
             {
-                switch (option)
-                {
-                    case 1:
-                        sendMovement();
-                        break;
-                    case 2:
-                        attack();
-                        break;
-                    case 3:
-                        clientLogic.TcpClient.Close();
-                        Connected = false;
-                        InActiveMatch = false;
-                        break;
-                    default:
-                        Console.WriteLine("Comando invalido");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                case 1:
+                    sendMovement();
+                    Console.WriteLine("Movimiento realizado correctamente");
+                    break;
+                case 2:
+                    attack();
+                    Console.WriteLine("Ataque realizado correctamente");
+                    break;
+                case 3:
+                    clientLogic.TcpClient.Close();
+                    Connected = false;
+                    InActiveMatch = false;
+                    Console.WriteLine("Sesión desconectada.");
+                    break;
+                default:
+                    Console.WriteLine("Comando invalido");
+                    break;
             }
         }
 
@@ -154,10 +154,11 @@ namespace Slasher.Client
 
         private void JoinToActiveMatch()
         {
-            int option = 0;
-            InActiveMatch = clientLogic.JoinActiveMatch();
-            if (InActiveMatch)
+            try
             {
+                int option = 0;
+                clientLogic.JoinActiveMatch();
+                InActiveMatch = true;
                 Thread threadInActiveMatch = new Thread(IsInActiveMatch);
                 threadInActiveMatch.Start();
                 while (InActiveMatch)
@@ -172,13 +173,17 @@ namespace Slasher.Client
                     {
                         Console.WriteLine("Comando inválido");
                     }
+                    catch (ClientException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 }
                 Console.WriteLine("Partida Terminada");
                 showPreGameMenu();
             }
-            else
+            catch (ClientException ex)
             {
-                Console.WriteLine("No se pudo unir a partida");
+                Console.WriteLine(ex.Message);
                 showPreGameMenu();
             }
         }
@@ -197,15 +202,25 @@ namespace Slasher.Client
                  inActiveMatchThread = clientLogic.CheckGameStatus() && InActiveMatch;
              }
              InActiveMatch = false;*/
-            InActiveMatch = !clientLogic.CheckGameStatus();
-         }
+         /*   try
+            {
+                finalizedMatchError = "";
+                clientLogic.CheckGameStatus();
+                InActiveMatch = false;
+            }
+            catch (ClientException ex)
+            {
+                finalizedMatchError = ex.Message;
+                InActiveMatch = false;
+            }*/
+        }
 
         private void registerUser()
         {
             Console.WriteLine("REGISTRO DE USUARIO");
             Console.WriteLine("Ingrese un nombre de usuario");
             string nickname = Console.ReadLine();
-            bool added = clientLogic.connect(nickname, "172.29.3.25", 6000);
+            bool added = clientLogic.connect(nickname, "192.168.1.125", 6000);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
@@ -222,14 +237,15 @@ namespace Slasher.Client
         {
             Console.WriteLine("Ingrese un ubicacion de imagen de avatar");
             string avatar = Console.ReadLine();
-            bool sendFileCorrectly = false;
-            while (!sendFileCorrectly)
+            try
             {
-                sendFileCorrectly = clientLogic.SendFile("nico.png");
-                if (!sendFileCorrectly)
-                    Console.Write("Ocurrió un error inesperado intente nuevamente");
-                else
-                    Console.Write("Imagen subida correctamente");
+                clientLogic.SendFile("nico.png");
+                Console.WriteLine("Imagen subida correctamente.");
+            }
+            catch (ClientException ex)
+            {
+                Console.WriteLine(ex.Message);
+                SendAvatar();
             }
         }
 
