@@ -132,8 +132,8 @@ namespace Slasher.Server
                 {
                     if (Match.MovementCommands.ContainsKey(direction))
                     {
-                        Match.MovePlayer(user, Match.MovementCommands[direction]);
-                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200");
+                        string closePlayers = Match.MovePlayer(user, Match.MovementCommands[direction]);
+                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200|"+closePlayers);
                         nws.Write(responseStream, 0, responseStream.Length);
                     }
                     else
