@@ -130,11 +130,16 @@ namespace Slasher.Server
             {
                 if (actionType == ActionType.MOVEMENT)
                 {
-                    string closePlayers = Match.MovePlayer(user, Match.MovementCommands[direction]);
-                    byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200|"+closePlayers);
-                    nws.Write(responseStream, 0, responseStream.Length);
+                    if (Match.MovementCommands.ContainsKey(direction))
+                    {
+                        string closePlayers = Match.MovePlayer(user, Match.MovementCommands[direction]);
+                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200|"+closePlayers);
+                        nws.Write(responseStream, 0, responseStream.Length);
+                    }
+                    else
+                        sendError(nws, "Comando invalido");
                 }
-                else if(actionType == ActionType.ATTACK)
+                else if (actionType == ActionType.ATTACK)
                 {
                     //ATTACK
                 }
@@ -159,11 +164,11 @@ namespace Slasher.Server
             catch (SurvivorsWinException)
             {
                 string winnersString = "";
-                foreach(User winner in Match.Winners)
+                foreach (User winner in Match.Winners)
                 {
                     winnersString += winner.NickName + ", ";
                 }
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "300|"+winnersString);
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "300|" + winnersString);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (MonsterWinsException)

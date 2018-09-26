@@ -48,7 +48,7 @@ namespace Slasher.Entities
 
         private void finishMatchByTime()
         {
-            Thread.Sleep(10000);
+            Thread.Sleep(180000);
             lock (lockMap)
             {
                 if (Active)
@@ -307,7 +307,7 @@ namespace Slasher.Entities
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    if (Map[i, j].Equals(user))
+                    if (Map[i,j]!=null && Map[i, j].Equals(user))
                         returnTuple = new Tuple<int, int>(i, j);
                 }
             }
