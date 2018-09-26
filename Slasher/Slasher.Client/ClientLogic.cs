@@ -152,6 +152,11 @@ namespace Slasher.Client
                 string winners = dataResponse.Split('|')[1];
                 throw new EndOfMatchException("Partida finalizada, ganan sobrevivientes. Ganadores: "+winners);
             }
+            if (dataResponse.Contains("400"))
+            {
+                string winners = dataResponse.Split('|')[1];
+                throw new EndOfMatchException("Partida finalizada, gana monstruo: " + winners);
+            }
         }
 
         private void CheckOkResponse(byte[] data)
