@@ -12,16 +12,10 @@ namespace Slasher.Client
     public class ClientInterface
     {
         private ClientLogic clientLogic;
-        private bool Connected { get; set; }
-        private bool InActiveMatch { get; set; }
-        private string finalizedMatchError;
 
         public ClientInterface()
         {
             clientLogic = new ClientLogic();
-            Connected = true;
-            InActiveMatch = false;
-            finalizedMatchError = "";
         }
 
         public void start()
@@ -32,7 +26,7 @@ namespace Slasher.Client
         private void mainMenu()
         {
             int option = 0;
-            while (Connected)
+            while (clientLogic.Connected)
             {
                 try
                 {
@@ -78,7 +72,7 @@ namespace Slasher.Client
                         break;
                     case 2:
                         clientLogic.TcpClient.Close();
-                        Connected = false;
+                        clientLogic.Connected = false;
                         break;
                     default:
                         Console.WriteLine("Comando invalido");
@@ -106,8 +100,8 @@ namespace Slasher.Client
                     break;
                 case 3:
                     clientLogic.TcpClient.Close();
-                    Connected = false;
-                    InActiveMatch = false;
+                    clientLogic.Connected = false;
+                    clientLogic.InActiveMatch = false;
                     Console.WriteLine("Sesión desconectada.");
                     break;
                 default:
@@ -137,7 +131,7 @@ namespace Slasher.Client
                         break;
                     case 2:
                         clientLogic.TcpClient.Close();
-                        Connected = false;
+                        clientLogic.Connected = false;
                         break;
                     default:
                         Console.WriteLine("Comando invalido");
@@ -158,10 +152,10 @@ namespace Slasher.Client
             {
                 int option = 0;
                 clientLogic.JoinActiveMatch();
-                InActiveMatch = true;
+                clientLogic.InActiveMatch = true;
                 Thread threadInActiveMatch = new Thread(IsInActiveMatch);
                 threadInActiveMatch.Start();
-                while (InActiveMatch)
+                while (clientLogic.InActiveMatch)
                 {
                     try
                     {
@@ -177,8 +171,11 @@ namespace Slasher.Client
                     {
                         Console.WriteLine(ex.Message);
                     }
+                    catch (EndOfMatchException)
+                    {
+                        Console.WriteLine("Partida Terminada")
+                    }
                 }
-                Console.WriteLine("Partida Terminada");
                 showPreGameMenu();
             }
             catch (ClientException ex)

@@ -15,9 +15,14 @@ namespace Slasher.Client
     {
 
         public TcpClient TcpClient { get; set; }
-        private bool Connected { get; set; }
+        public bool Connected { get; set; }
+        public bool InActiveMatch { get; set; }
 
-
+        public ClientLogic()
+        {
+            Connected = true;
+            InActiveMatch = false;
+        }
 
         public bool connect(string name, string serverIP, int port)
         {
@@ -118,6 +123,14 @@ namespace Slasher.Client
                 case 41:
                     CheckOkResponse(data);
                     break;
+                case 51:
+                    //attack
+                    break;
+                case 61:
+                    CheckOkResponse(data);
+                    finishActiveMatch();
+                    break;
+
                 case 99:
                     serverError(data);
                     break;
@@ -127,6 +140,12 @@ namespace Slasher.Client
                     Console.WriteLine("cliente no conectado es: " + hola);
                     break;
             }
+        }
+
+        private void finishActiveMatch()
+        {
+            InActiveMatch = false;
+            throw new EndOfMatchException();
         }
 
         private void CheckOkResponse(byte[] data)

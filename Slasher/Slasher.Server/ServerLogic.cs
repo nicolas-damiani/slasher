@@ -128,10 +128,11 @@ namespace Slasher.Server
         {
             try
             {
+                Match.MovePlayer(user, Match.MovementCommands[direction]);
                 byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200");
                 nws.Write(responseStream, 0, responseStream.Length);
-                Match.MovePlayer(user, Match.MovementCommands[direction]);
-            }catch(OccupiedSlotException)
+            }
+            catch (OccupiedSlotException)
             {
                 sendError(nws, "Ya existe un usuario en esa posición");
             }
@@ -139,12 +140,14 @@ namespace Slasher.Server
             {
                 sendError(nws, "El movimiento que quiere realizar es inválido");
             }
-            catch (BoundsException)
+            catch (MoveOutOfBoundsException)
             {
                 sendError(nws, "El movimiento que quiere realizar esta fuera de los limites.");
-            }catch (EndOfMatchException)
+            }
+            catch (EndOfMatchException)
             {
-                sendError(nws, "La partida ha finalizado.");
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "200");
+                nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (Exception)
             {
