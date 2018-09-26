@@ -12,12 +12,14 @@ namespace Slasher.Entities
         public string Avatar { get; set; }
         public Character Character { get; set; }
         public bool Connected { get; set; }
+        public int Turn { get; set; }
 
         public User(string nickname, string avatar)
         {
             NickName = nickname;
             Avatar = avatar;
             Connected = true;
+            Turn = 0;
         }
 
         public User()
