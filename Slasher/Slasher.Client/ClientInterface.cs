@@ -173,7 +173,7 @@ namespace Slasher.Client
                     }
                     catch (EndOfMatchException)
                     {
-                        Console.WriteLine("Partida Terminada")
+                        Console.WriteLine("Partida Terminada");
                     }
                 }
                 showPreGameMenu();

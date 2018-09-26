@@ -127,8 +127,7 @@ namespace Slasher.Client
                     //attack
                     break;
                 case 61:
-                    CheckOkResponse(data);
-                    finishActiveMatch();
+                    finishActiveMatch(data);
                     break;
 
                 case 99:
@@ -142,10 +141,17 @@ namespace Slasher.Client
             }
         }
 
-        private void finishActiveMatch()
+        private void finishActiveMatch(byte [] data)
         {
             InActiveMatch = false;
-            throw new EndOfMatchException();
+            string dataResponse = System.Text.Encoding.ASCII.GetString(data);
+            if (dataResponse.Equals("200"))
+                throw new EndOfMatchException("Partida finalizada, no hubieron ganadores.");
+            if (dataResponse.Contains("300"))
+            {
+                string winners = dataResponse.Split('|')[1];
+                throw new EndOfMatchException("Partida finalizada, ganan sobrevivientes. Ganadores: "+winners);
+            }
         }
 
         private void CheckOkResponse(byte[] data)

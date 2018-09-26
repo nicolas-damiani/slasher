@@ -269,7 +269,7 @@ namespace Slasher.Entities
 
         private void ApplyAttack(User user, Tuple<int, int> targetPosition)
         {
-            User targetUser = GetUserByPosition(targetPosition);
+         /*   User targetUser = GetUserByPosition(targetPosition);
             switch (user.Character.GetType())
             {
                 //case CharacterType.MONSTER:
@@ -278,7 +278,7 @@ namespace Slasher.Entities
                 //case CharacterType.SURVIVOR:
                 //    Console.WriteLine("sobreviviente");
                 //    break;
-            }
+            }*/
         }
 
         private User GetUserByPosition(Tuple<int, int> targetPosition)
