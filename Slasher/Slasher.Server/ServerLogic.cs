@@ -155,6 +155,26 @@ namespace Slasher.Server
                 byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "200");
                 nws.Write(responseStream, 0, responseStream.Length);
             }
+            catch (SurvivorsWinException)
+            {
+                string winnersString = "";
+                foreach(User winner in Match.Winners)
+                {
+                    winnersString += winner.NickName + ", ";
+                }
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "300|"+winnersString);
+                nws.Write(responseStream, 0, responseStream.Length);
+            }
+            catch (MonsterWinsException)
+            {
+                string winnersString = "";
+                foreach (User winner in Match.Winners)
+                {
+                    winnersString += winner.NickName + ", ";
+                }
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "300|" + winnersString);
+                nws.Write(responseStream, 0, responseStream.Length);
+            }
             catch (Exception)
             {
                 sendError(nws, "Ocurrió un error inesperado.");
