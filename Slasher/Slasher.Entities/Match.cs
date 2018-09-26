@@ -117,7 +117,7 @@ namespace Slasher.Entities
             Map[position.Item1, position.Item2] = user;
         }
 
-        public void MovePlayer(User user, Direction direction)
+        public string MovePlayer(User user, Direction direction)
         {
             lock (lockMap)
             {
@@ -130,6 +130,7 @@ namespace Slasher.Entities
                     user.Turn = user.Turn + 1;
                     CheckFinishedMatch();
                     ProcessAllTurns();
+                    return GetCloseUsersList(user);
                 }
                 else
                 {
@@ -316,13 +317,14 @@ namespace Slasher.Entities
                 throw new UserIsDeadException();
         }
 
-        public void PlayerAttack(User user, Direction direction)
+        public string PlayerAttack(User user, Direction direction)
         {
             lock (lockMap)
             {
                 Tuple<int, int> position = FindUserPosition(user);
                 AttackInsideBounds(position, direction);
                 AttackTarget(user, position, direction);
+                return GetCloseUsersList(user);
             }
         }
 
@@ -420,6 +422,77 @@ namespace Slasher.Entities
         private User GetUserByPosition(Tuple<int, int> targetPosition)
         {
             return Map[targetPosition.Item1, targetPosition.Item2];
+        }
+
+        private string GetCloseUsersList(User user)
+        {
+            Tuple<int, int> userPosition = FindUserPosition(user);
+            string closeUsers = "Coordenadas actuales: "+userPosition.Item1+","+userPosition.Item2+". Jugadores cercanos: ";
+            if (userPosition.Item1 != LAST_ROW && Map[userPosition.Item1 + 1, userPosition.Item2] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            if (userPosition.Item1 != FIRST_ROW && Map[userPosition.Item1 - 1, userPosition.Item2] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            if (userPosition.Item2 != LAST_COL && Map[userPosition.Item1, userPosition.Item2 + 1] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            if (userPosition.Item2 != FIRST_COL && Map[userPosition.Item1, userPosition.Item2 - 1] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            if (userPosition.Item1 != LAST_ROW && userPosition.Item2 != LAST_COL && Map[userPosition.Item1 + 1, userPosition.Item2 + 1] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            if (userPosition.Item1 != FIRST_ROW && userPosition.Item2 != FIRST_COL && Map[userPosition.Item1 - 1, userPosition.Item2 - 1] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            if (userPosition.Item1 != FIRST_ROW && userPosition.Item2 != LAST_COL && Map[userPosition.Item1 - 1, userPosition.Item2 + 1] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            if (userPosition.Item1 != LAST_ROW && userPosition.Item2 != FIRST_COL && Map[userPosition.Item1 + 1, userPosition.Item2 - 1] != null)
+            {
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                if (closeUser.Character.Type == CharacterType.MONSTER)
+                    closeUsers += "Monstruo, ";
+                else
+                    closeUsers += "Sobreviviente, ";
+            }
+            return closeUsers;
         }
     }
 }
