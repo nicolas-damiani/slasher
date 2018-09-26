@@ -91,12 +91,10 @@ namespace Slasher.Client
             switch (option)
             {
                 case 1:
-                    sendMovement();
-                    Console.WriteLine("Movimiento realizado correctamente");
+                    Console.WriteLine(sendMovement());
                     break;
                 case 2:
-                    attack();
-                    Console.WriteLine("Ataque realizado correctamente");
+                    Console.WriteLine(attack());
                     break;
                 case 3:
                     clientLogic.TcpClient.Close();
@@ -110,7 +108,7 @@ namespace Slasher.Client
             }
         }
 
-        private void attack()
+        private string attack()
         {
             throw new NotImplementedException();
         }
@@ -122,8 +120,8 @@ namespace Slasher.Client
             Console.WriteLine("2) DESCONECTARSE");
             Console.WriteLine("*******************************");
             int option = int.Parse(Console.ReadLine());
-            try
-            {
+            try { 
+            
                 switch (option)
                 {
                     case 1:
@@ -151,10 +149,8 @@ namespace Slasher.Client
             try
             {
                 int option = 0;
-                clientLogic.JoinActiveMatch();
+                Console.WriteLine(clientLogic.JoinActiveMatch());
                 clientLogic.InActiveMatch = true;
-                Thread threadInActiveMatch = new Thread(IsInActiveMatch);
-                threadInActiveMatch.Start();
                 while (clientLogic.InActiveMatch)
                 {
                     try
@@ -185,33 +181,6 @@ namespace Slasher.Client
             }
         }
 
-        internal void IsInActiveMatch()
-        {
-            /* bool inActiveMatchThread = true;
-             while (inActiveMatchThread)
-             {
-
-                 if (!clientLogic.CheckGameStatus())
-                 {
-                     inActiveMatchThread = clientLogic.CheckGameStatus();
-                     Console.WriteLine("Partida finalizada");
-                 }
-                 inActiveMatchThread = clientLogic.CheckGameStatus() && InActiveMatch;
-             }
-             InActiveMatch = false;*/
-         /*   try
-            {
-                finalizedMatchError = "";
-                clientLogic.CheckGameStatus();
-                InActiveMatch = false;
-            }
-            catch (ClientException ex)
-            {
-                finalizedMatchError = ex.Message;
-                InActiveMatch = false;
-            }*/
-        }
-
         private void registerUser()
         {
             Console.WriteLine("REGISTRO DE USUARIO");
@@ -236,8 +205,7 @@ namespace Slasher.Client
             string avatar = Console.ReadLine();
             try
             {
-                clientLogic.SendFile("nico.png");
-                Console.WriteLine("Imagen subida correctamente.");
+                Console.WriteLine(clientLogic.SendFile("nico.png"));
             }
             catch (ClientException ex)
             {
@@ -246,13 +214,11 @@ namespace Slasher.Client
             }
         }
 
-        private void sendMovement()
+        private string sendMovement()
         {
             Console.WriteLine("Ingrese movimiento escribiendo el comando");
             string movement = Console.ReadLine();
-            clientLogic.SendMovement(movement);
+            return clientLogic.SendMovement(movement);
         }
-
-
     }
 }

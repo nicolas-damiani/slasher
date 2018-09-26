@@ -54,47 +54,49 @@ namespace Slasher.Client
 
         }
 
-        public void SendMovement(string movement)
+        public string SendMovement(string movement)
         {
             NetworkStream clientStream = TcpClient.GetStream();
             byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "40", movement);
             clientStream.Write(data, 0, data.Length);
-            receiveData();
+            return receiveData();
         }
 
-        public void SendFile(string filePath)
+        public string SendFile(string filePath)
         {
             byte[] stream = Protocol.ReadFully(filePath);
             NetworkStream clientStream = TcpClient.GetStream();
             byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "10", System.Text.Encoding.ASCII.GetString(stream));
             clientStream.Write(data, 0, data.Length);
-            receiveData();
+            return receiveData();
         }
 
-        internal void CheckGameStatus()
+        internal string CheckGameStatus()
         {
             NetworkStream clientStream = TcpClient.GetStream();
             byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "30", "");
             clientStream.Write(data, 0, data.Length);
-            receiveData();
+            return receiveData();
         }
 
-        internal void JoinActiveMatch()
+        internal string JoinActiveMatch()
         {
             NetworkStream clientStream = TcpClient.GetStream();
             byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "20", "");
             clientStream.Write(data, 0, data.Length);
-            receiveData();
+            return receiveData();
         }
 
-        private void receiveData()
+        private string receiveData()
         {
             try
             {
                 byte[] header = new byte[Protocol.HEADER_SIZE + 5];
                 header = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 5);
                 if (header != null)
-                    executeAction(header);
+                    return executeAction(header);
+                else
+                    return "Ocurrio un error inesperado";
             }
             catch (SocketException ex)
             {
@@ -102,7 +104,7 @@ namespace Slasher.Client
             }
         }
 
-        private void executeAction(byte[] header)
+        private string executeAction(byte[] header)
         {
             NetworkStream nws = TcpClient.GetStream();
             int dataLength = Protocol.GetDataLength(header);
@@ -113,32 +115,44 @@ namespace Slasher.Client
             {
                 case 11:
                     CheckOkResponse(data);
-                    break;
+                    return "Archivo subido correctamente.";
                 case 21:
                     CheckOkResponse(data);
-                    break;
+                    return "Unido a partida correctamente correctamente.";
                 case 31:
                     CheckOkResponse(data);
                     break;
                 case 41:
                     CheckOkResponse(data);
-                    break;
+                    return movementResponse(data);
                 case 51:
-                    //attack
-                    break;
+                    CheckOkResponse(data);
+                    return movementResponse(data);
                 case 61:
                     finishActiveMatch(data);
-                    break;
-
+                    return attackResponse(data);
                 case 99:
                     serverError(data);
-                    break;
-
+                    return "";
+                
                 default:
-                    string hola = System.Text.Encoding.ASCII.GetString(header);
-                    Console.WriteLine("cliente no conectado es: " + hola);
-                    break;
+                    return "";
             }
+            return "";
+        }
+
+        private string movementResponse(byte[] data)
+        {
+            string dataResponse = System.Text.Encoding.ASCII.GetString(data);
+            string infoOfMovement = dataResponse.Split('|')[1];
+            return infoOfMovement;
+        }
+
+        private string attackResponse(byte[] data)
+        {
+            string dataResponse = System.Text.Encoding.ASCII.GetString(data);
+            string infoOfMovement = dataResponse.Split('|')[1];
+            return infoOfMovement;
         }
 
         private void finishActiveMatch(byte [] data)
