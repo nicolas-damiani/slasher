@@ -186,16 +186,32 @@ namespace Slasher.Client
             Console.WriteLine("REGISTRO DE USUARIO");
             Console.WriteLine("Ingrese un nombre de usuario");
             string nickname = Console.ReadLine();
-            bool added = clientLogic.connect(nickname, "192.168.1.125", 6000);
+            bool added = clientLogic.connect(nickname, "10.211.55.3", 6000);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
-                SendAvatar();
+                //SendAvatar();
+                SendCharacterType();
             }
             else
             {
                 Console.WriteLine("El nombre de usuario ya esta utilizado, ingrese otro");
                 registerUser();
+            }
+        }
+
+        private void SendCharacterType()
+        {
+            Console.WriteLine("Seleccione un tipo de jugador ('sobreviviente' o 'monstruo')");
+            string characterType = Console.ReadLine();
+            try
+            {
+                Console.WriteLine(clientLogic.SendCharacterType(characterType));
+            }
+            catch (ClientException ex)
+            {
+                Console.WriteLine(ex.Message);
+                SendAvatar();
             }
         }
 

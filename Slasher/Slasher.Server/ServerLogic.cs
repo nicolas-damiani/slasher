@@ -58,7 +58,7 @@ namespace Slasher.Server
 
         internal void ConnectServer()
         {
-            IPAddress ipAddress = IPAddress.Parse("192.168.1.125");
+            IPAddress ipAddress = IPAddress.Parse("10.211.55.3");
             Listener = new TcpListener(ipAddress, 6000);
             Connected = true;
             Console.WriteLine("local ip address: " + ipAddress);
@@ -111,6 +111,9 @@ namespace Slasher.Server
                     downloadFile("nico.png", data);
                     sendFileResponse(nws);
                     break;
+                case 15:
+                    selectCharacterType(RegisteredUsers[client], nws, data);
+                    break;
                 case 20:
                     joinMatch(RegisteredUsers[client], nws);
                     break;
@@ -124,6 +127,20 @@ namespace Slasher.Server
             };
         }
 
+        private void selectCharacterType(User user, NetworkStream nws, byte[] data)
+        {
+            string command = UnicodeEncoding.ASCII.GetString(data);
+            if (user.CharacterTypesCommand.ContainsKey(command))
+            {
+                user.SetCharacterType(user.CharacterTypesCommand[command]);
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "16", "200");
+                nws.Write(responseStream, 0, responseStream.Length);
+            }
+            else
+                sendError(nws, "Comando invalido");
+
+        }
+
         private void playerAction(NetworkStream nws, User user, string direction, ActionType actionType)
         {
             try
@@ -133,7 +150,7 @@ namespace Slasher.Server
                     if (Match.MovementCommands.ContainsKey(direction))
                     {
                         string closePlayers = Match.MovePlayer(user, Match.MovementCommands[direction]);
-                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200|"+closePlayers);
+                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200|" + closePlayers);
                         nws.Write(responseStream, 0, responseStream.Length);
                     }
                     else
@@ -158,6 +175,11 @@ namespace Slasher.Server
             }
             catch (EndOfMatchException)
             {
+                string winnersString = "";
+                foreach (User winner in Match.Winners)
+                {
+                    winnersString += winner.NickName + ", ";
+                }
                 byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "200");
                 nws.Write(responseStream, 0, responseStream.Length);
             }

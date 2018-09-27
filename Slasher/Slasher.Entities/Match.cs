@@ -71,8 +71,6 @@ namespace Slasher.Entities
                     Winners.Add(user);
                 }
             }
-            if (survivorsWin)
-                throw new SurvivorsWinException();
         }
 
         private void InitializeMap()
@@ -298,7 +296,11 @@ namespace Slasher.Entities
                 }
             }
             else
+            {
+                if (Winners.Count != 0)
+                    throw new SurvivorsWinException();
                 throw new EndOfMatchException();
+            }
         }
 
         private Tuple<int, int> FindUserPosition(User user)

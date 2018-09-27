@@ -116,6 +116,9 @@ namespace Slasher.Client
                 case 11:
                     CheckOkResponse(data);
                     return "Archivo subido correctamente.";
+                case 16:
+                    CheckOkResponse(data);
+                    return "Tipo de jugador asignado correctamente.";
                 case 21:
                     CheckOkResponse(data);
                     return "Unido a partida correctamente correctamente.";
@@ -183,6 +186,14 @@ namespace Slasher.Client
         private void serverError(byte[] data)
         {
             throw new ClientException(Encoding.ASCII.GetString(data));
+        }
+
+        internal string SendCharacterType(string characterType)
+        {
+            NetworkStream clientStream = TcpClient.GetStream();
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "15", characterType);
+            clientStream.Write(data, 0, data.Length);
+            return receiveData();
         }
     }
 }

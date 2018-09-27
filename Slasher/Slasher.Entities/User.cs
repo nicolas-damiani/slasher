@@ -13,6 +13,7 @@ namespace Slasher.Entities
         public Character Character { get; set; }
         public bool Connected { get; set; }
         public int Turn { get; set; }
+        public Dictionary<string, CharacterType> CharacterTypesCommand;
 
         public User(string nickname, string avatar)
         {
@@ -20,11 +21,22 @@ namespace Slasher.Entities
             Avatar = avatar;
             Connected = true;
             Turn = 0;
+            CharacterTypesCommand = new Dictionary<string, CharacterType>()
+            {
+                { "monstruo", CharacterType.MONSTER },
+                { "sobreviviente", CharacterType.SURVIVOR},
+            };
         }
 
         public User()
         {
             Connected = true;
+            Turn = 0;
+            CharacterTypesCommand = new Dictionary<string, CharacterType>()
+            {
+                { "monstruo", CharacterType.MONSTER },
+                { "sobreviviente", CharacterType.SURVIVOR},
+            };
         }
 
         public override bool Equals(object objectToCompare)
@@ -36,6 +48,11 @@ namespace Slasher.Entities
                 User compareUser = (User)objectToCompare;
                 return this.NickName.Equals(compareUser.NickName);
             }
+        }
+
+        public void SetCharacterType(CharacterType type)
+        {
+            Character = new Character(type);
         }
     }
 }
