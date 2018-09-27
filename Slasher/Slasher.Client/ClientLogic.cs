@@ -176,7 +176,7 @@ namespace Slasher.Client
         private void CheckOkResponse(byte[] data)
         {
             string dataResponse = System.Text.Encoding.ASCII.GetString(data);
-            if (!dataResponse.Equals(Protocol.OkResponse))
+            if (!dataResponse.Contains(Protocol.OkResponse))
                 throw new ClientException("Ocurrió un error inesperado.");
         }
 

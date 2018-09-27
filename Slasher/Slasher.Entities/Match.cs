@@ -88,6 +88,7 @@ namespace Slasher.Entities
 
         public bool AddUserToMatch(User user)
         {
+            Users.Add(user);
             return SetUserRandomPosition(user);
         }
 
@@ -307,7 +308,7 @@ namespace Slasher.Entities
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    if (Map[i,j]!=null && Map[i, j].Equals(user))
+                    if (Map[i, j] != null && Map[i, j].Equals(user))
                         returnTuple = new Tuple<int, int>(i, j);
                 }
             }
@@ -427,7 +428,7 @@ namespace Slasher.Entities
         private string GetCloseUsersList(User user)
         {
             Tuple<int, int> userPosition = FindUserPosition(user);
-            string closeUsers = "Coordenadas actuales: "+userPosition.Item1+","+userPosition.Item2+". Jugadores cercanos: ";
+            string closeUsers = "Coordenadas actuales: " + userPosition.Item1 + "," + userPosition.Item2 + ". Jugadores cercanos: ";
             if (userPosition.Item1 != LAST_ROW && Map[userPosition.Item1 + 1, userPosition.Item2] != null)
             {
                 User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];

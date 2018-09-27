@@ -181,6 +181,10 @@ namespace Slasher.Server
                 byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "300|" + winnersString);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
+            catch (UserTurnLimitException)
+            {
+                sendError(nws, "Debe esperar a que todos los jugadores realizan terminen su turno.");
+            }
             catch (Exception)
             {
                 sendError(nws, "Ocurrió un error inesperado.");
