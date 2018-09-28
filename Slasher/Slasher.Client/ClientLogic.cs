@@ -62,6 +62,14 @@ namespace Slasher.Client
             return receiveData();
         }
 
+        public string SendAttack(string direction)
+        {
+            NetworkStream clientStream = TcpClient.GetStream();
+            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "50", direction);
+            clientStream.Write(data, 0, data.Length);
+            return receiveData();
+        }
+
         public string SendFile(string filePath)
         {
             byte[] stream = Protocol.ReadFully(filePath);
@@ -130,7 +138,7 @@ namespace Slasher.Client
                     return movementResponse(data);
                 case 51:
                     CheckOkResponse(data);
-                    return movementResponse(data);
+                    return attackResponse(data);
                 case 61:
                     finishActiveMatch(data);
                     return attackResponse(data);

@@ -124,6 +124,10 @@ namespace Slasher.Server
                     string movement = UnicodeEncoding.ASCII.GetString(data);
                     playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
                     break;
+                case 50:
+                    string attackDirection = UnicodeEncoding.ASCII.GetString(data);
+                    playerAction(nws, RegisteredUsers[client], attackDirection, ActionType.ATTACK);
+                    break;
             };
         }
 
@@ -158,12 +162,23 @@ namespace Slasher.Server
                 }
                 else if (actionType == ActionType.ATTACK)
                 {
-                    //ATTACK
+                    if (Match.MovementCommands.ContainsKey(direction))
+                    {
+                        string attackResponse = Match.PlayerAttack(user, Match.MovementCommands[direction]);
+                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "51", "200|" + attackResponse);
+                        nws.Write(responseStream, 0, responseStream.Length);
+                    }
+                    else
+                        sendError(nws, "Comando invalido");
                 }
             }
             catch (OccupiedSlotException)
             {
                 sendError(nws, "Ya existe un usuario en esa posición");
+            }
+            catch (InvalidSurvivorAttackException)
+            {
+                sendError(nws, "Solo puede atacar monstruos");
             }
             catch (InvalidMoveException)
             {

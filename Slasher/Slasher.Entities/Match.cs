@@ -48,7 +48,7 @@ namespace Slasher.Entities
 
         private void finishMatchByTime()
         {
-            Thread.Sleep(180000);
+            Thread.Sleep(1800000);
             lock (lockMap)
             {
                 if (Active)
@@ -327,6 +327,9 @@ namespace Slasher.Entities
                 Tuple<int, int> position = FindUserPosition(user);
                 AttackInsideBounds(position, direction);
                 AttackTarget(user, position, direction);
+                user.Turn = user.Turn + 1;
+                CheckFinishedMatch();
+                ProcessAllTurns();
                 return GetCloseUsersList(user);
             }
         }
@@ -372,16 +375,37 @@ namespace Slasher.Entities
                     }
                     break;
                 case Direction.DOWN:
-                    if (position.Item1 == LAST_ROW)
+                    if (Map[position.Item1 + 1, position.Item2] != null)
+                    {
+                        Tuple<int, int> targetPosition = new Tuple<int, int>(position.Item1 + 1, position.Item2);
+                        ApplyAttack(user, targetPosition);
+                    }
+                    else
+                    {
                         throw new EmptyAttackTargetException();
+                    }
                     break;
                 case Direction.RIGHT:
-                    if (position.Item2 == LAST_COL)
+                    if (Map[position.Item1, position.Item2 + 1] != null)
+                    {
+                        Tuple<int, int> targetPosition = new Tuple<int, int>(position.Item1, position.Item2 + 1);
+                        ApplyAttack(user, targetPosition);
+                    }
+                    else
+                    {
                         throw new EmptyAttackTargetException();
+                    }
                     break;
                 case Direction.LEFT:
-                    if (position.Item2 == FIRST_COL)
+                    if (Map[position.Item1, position.Item2 - 1] != null)
+                    {
+                        Tuple<int, int> targetPosition = new Tuple<int, int>(position.Item1, position.Item2 - 1);
+                        ApplyAttack(user, targetPosition);
+                    }
+                    else
+                    {
                         throw new EmptyAttackTargetException();
+                    }
                     break;
                 default:
                     throw new InvalidAttackException();
@@ -397,7 +421,10 @@ namespace Slasher.Entities
                     SubstractLifeFromAttackedUser(targetUser, Character.MONSTER_ATTACK);
                     break;
                 case CharacterType.SURVIVOR:
-                    SubstractLifeFromAttackedUser(targetUser, Character.SURVIVOR_LIFE);
+                    if (targetUser.Character.Type == CharacterType.MONSTER)
+                        SubstractLifeFromAttackedUser(targetUser, Character.SURVIVOR_LIFE);
+                    else
+                        throw new InvalidSurvivorAttackException();
                     break;
             }
         }
@@ -417,6 +444,7 @@ namespace Slasher.Entities
 
         private void RemovePlayerFromMatch(User user)
         {
+            user.Character.IsAlive = false;
             Tuple<int, int> position = FindUserPosition(user);
             Map[position.Item1, position.Item2] = null;
             //VER SI HAY QUE NOTIFICAR A ALGUIEN
@@ -435,65 +463,65 @@ namespace Slasher.Entities
             {
                 User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             if (userPosition.Item1 != FIRST_ROW && Map[userPosition.Item1 - 1, userPosition.Item2] != null)
             {
-                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                User closeUser = Map[userPosition.Item1 - 1, userPosition.Item2];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             if (userPosition.Item2 != LAST_COL && Map[userPosition.Item1, userPosition.Item2 + 1] != null)
             {
-                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                User closeUser = Map[userPosition.Item1, userPosition.Item2 + 1];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             if (userPosition.Item2 != FIRST_COL && Map[userPosition.Item1, userPosition.Item2 - 1] != null)
             {
-                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                User closeUser = Map[userPosition.Item1, userPosition.Item2 - 1];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             if (userPosition.Item1 != LAST_ROW && userPosition.Item2 != LAST_COL && Map[userPosition.Item1 + 1, userPosition.Item2 + 1] != null)
             {
-                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2 + 1];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             if (userPosition.Item1 != FIRST_ROW && userPosition.Item2 != FIRST_COL && Map[userPosition.Item1 - 1, userPosition.Item2 - 1] != null)
             {
-                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                User closeUser = Map[userPosition.Item1 - 1, userPosition.Item2 - 1];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             if (userPosition.Item1 != FIRST_ROW && userPosition.Item2 != LAST_COL && Map[userPosition.Item1 - 1, userPosition.Item2 + 1] != null)
             {
-                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                User closeUser = Map[userPosition.Item1 - 1, userPosition.Item2 + 1];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             if (userPosition.Item1 != LAST_ROW && userPosition.Item2 != FIRST_COL && Map[userPosition.Item1 + 1, userPosition.Item2 - 1] != null)
             {
-                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2];
+                User closeUser = Map[userPosition.Item1 + 1, userPosition.Item2 - 1];
                 if (closeUser.Character.Type == CharacterType.MONSTER)
-                    closeUsers += "Monstruo, ";
+                    closeUsers += "Monstruo (VIDA: " + closeUser.Character.Life + "), ";
                 else
-                    closeUsers += "Sobreviviente, ";
+                    closeUsers += "Sobreviviente (VIDA: " + closeUser.Character.Life + "), ";
             }
             return closeUsers;
         }

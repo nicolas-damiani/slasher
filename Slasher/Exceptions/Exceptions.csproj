@@ -46,6 +46,7 @@
     <Compile Include="EndOfMatchException.cs" />
     <Compile Include="AttackOutOfBoundsException.cs" />
     <Compile Include="EmptyAttackTargetException.cs" />
+    <Compile Include="InvalidSurvivorAttackException.cs" />
     <Compile Include="MonsterWinsException.cs" />
     <Compile Include="MoveOutOfBoundsException.cs" />
     <Compile Include="InvalidAttackException.cs" />

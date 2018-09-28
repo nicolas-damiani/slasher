@@ -54,8 +54,8 @@ namespace Slasher.Client
         private void showGameMenu()
         {
             Console.WriteLine("*******************************");
-            Console.WriteLine("1) ATACAR");
-            Console.WriteLine("2) MOVER");
+            Console.WriteLine("1) MOVER");
+            Console.WriteLine("2) ATACAR");
             Console.WriteLine("3) DESCONECTARSE");
             Console.WriteLine("*******************************\n");
         }
@@ -110,7 +110,9 @@ namespace Slasher.Client
 
         private string attack()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Ingrese direccion escribiendo el comando");
+            string direction = Console.ReadLine();
+            return clientLogic.SendAttack(direction);
         }
 
         private void showPreGameMenu()
