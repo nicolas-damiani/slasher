@@ -58,7 +58,7 @@ namespace Slasher.Server
 
         internal void ConnectServer()
         {
-            IPAddress ipAddress = IPAddress.Parse("10.211.55.3");
+            IPAddress ipAddress = IPAddress.Parse("192.168.1.46");
             Listener = new TcpListener(ipAddress, 6000);
             Connected = true;
             Console.WriteLine("local ip address: " + ipAddress);
@@ -96,24 +96,33 @@ namespace Slasher.Server
         {
             NetworkStream nws = client.GetStream();
             int dataLength = Protocol.GetDataLength(headerInformation);
-            byte[] data = new byte[dataLength];
-            data = Protocol.GetData(client, dataLength);
             int command = Protocol.getCommandAction(headerInformation);
 
             switch (command)
             {
                 case 01:
-                    string name = UnicodeEncoding.ASCII.GetString(data);
-                    user.NickName = name;
-                    sendAuthorizatonData(name, nws, client, ref user);
-                    break;
+                    {
+                        byte[] data = new byte[dataLength];
+                        data = Protocol.GetData(client, dataLength);
+                        string name = UnicodeEncoding.ASCII.GetString(data);
+                        user.NickName = name;
+                        sendAuthorizatonData(name, nws, client, ref user);
+                        break;
+                    }
                 case 10:
-                    downloadFile("nico.png", data);
+                    byte[] partsInfoData = Protocol.GetData(client, 2);
+                    string amountOfPartsString = UnicodeEncoding.ASCII.GetString(partsInfoData);
+                    int amountOfParts = Int32.Parse(amountOfPartsString);
+                    downloadFile(RegisteredUsers[client].NickName, dataLength, amountOfParts,client);
                     sendFileResponse(nws);
                     break;
                 case 15:
-                    selectCharacterType(RegisteredUsers[client], nws, data);
-                    break;
+                    {
+                        byte[] data = new byte[dataLength];
+                        data = Protocol.GetData(client, dataLength);
+                        selectCharacterType(RegisteredUsers[client], nws, data);
+                        break;
+                    }
                 case 20:
                     joinMatch(RegisteredUsers[client], nws);
                     break;
@@ -121,10 +130,14 @@ namespace Slasher.Server
                     respondWhenMatchFinishes(nws);
                     break;
                 case 40:
-                    string movement = UnicodeEncoding.ASCII.GetString(data);
-                    playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
-                    break;
-            };
+                    {
+                        byte[] data = new byte[dataLength];
+                        data = Protocol.GetData(client, dataLength);
+                        string movement = UnicodeEncoding.ASCII.GetString(data);
+                        playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
+                        break;
+                    }
+                    };
         }
 
         private void selectCharacterType(User user, NetworkStream nws, byte[] data)
@@ -307,9 +320,8 @@ namespace Slasher.Server
             }
         }
 
-        private static void downloadFile(string name, byte[] fileData)
+        private static void downloadFile(string name, int dataLength, int total, TcpClient client)
         {
-            name = "nico.png";
             /*  if (File.Exists(startupPath + "\\" + name))
               {
                   File.Delete(startupPath + "\\" + name);
@@ -318,7 +330,25 @@ namespace Slasher.Server
               fs.Write(fileData, 0, fileData.Length);
               fs.Close();
               */
-            MemoryStream stream = new MemoryStream(fileData);
+            byte[] totalFile = new byte[dataLength];
+            int totalRead = 0;
+            for (int i = 0; i<=total; i++)
+            {
+                int partSize = 0;
+                if (i < total)
+                {
+                    partSize = 8192;
+                }
+                else
+                {
+                    partSize = (int)dataLength - (total * 8192);
+                }
+
+                byte[] partOfFile = Protocol.GetData(client, partSize);
+                System.Buffer.BlockCopy(partOfFile, 0, totalFile, totalRead, partOfFile.Length);
+                totalRead += partSize;
+            }
+            MemoryStream stream = new MemoryStream(totalFile);
             using (FileStream fileStream = File.Create(startupPath + "\\" + name, (int)stream.Length))
             {
                 byte[] bytesInStream = new byte[stream.Length];

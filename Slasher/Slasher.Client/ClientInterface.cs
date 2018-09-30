@@ -186,11 +186,11 @@ namespace Slasher.Client
             Console.WriteLine("REGISTRO DE USUARIO");
             Console.WriteLine("Ingrese un nombre de usuario");
             string nickname = Console.ReadLine();
-            bool added = clientLogic.connect(nickname, "10.211.55.3", 6000);
+            bool added = clientLogic.connect(nickname, "192.168.1.46", 6000);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
-                //SendAvatar();
+                SendAvatar();
                 SendCharacterType();
             }
             else
@@ -221,7 +221,7 @@ namespace Slasher.Client
             string avatar = Console.ReadLine();
             try
             {
-                Console.WriteLine(clientLogic.SendFile("nico.png"));
+                Console.WriteLine(clientLogic.SendFile(avatar));
             }
             catch (ClientException ex)
             {

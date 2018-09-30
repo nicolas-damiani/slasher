@@ -67,11 +67,50 @@ namespace Protocols
             return data;
         }
 
+        public static byte[] GetDataFromFile(TcpClient tcpClient, int size)
+        {
+            int bufferSize = tcpClient.ReceiveBufferSize;
+            NetworkStream dataStream = tcpClient.GetStream();
+            byte[] data = new byte[size];
+            int pos = 0;
+            int currentData = 0;
+
+            while (pos < size)
+            {
+                try
+                {
+                    currentData = dataStream.Read(data, pos, size - pos);
+                    pos += currentData;
+                    if (currentData == 0)
+                    {
+                        dataStream.Close();
+                        tcpClient.Close();
+                        data = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    tcpClient.Close();
+                    return null;
+                }
+            }
+            return data;
+        }
+
 
         public static int getCommandAction(byte[] stream)
         {
             string resultString = System.Text.Encoding.ASCII.GetString(stream);
             string commandCodeString = resultString.Substring(3, 2);
+            int commandCode = Int32.Parse(commandCodeString);
+            return commandCode;
+        }
+
+        public static int getTotalPartsFromFile(byte[] stream)
+        {
+            string resultString = System.Text.Encoding.ASCII.GetString(stream);
+            string commandCodeString = resultString.Substring(0, 2);
             int commandCode = Int32.Parse(commandCodeString);
             return commandCode;
         }
@@ -172,17 +211,52 @@ namespace Protocols
             return stringToBytes(response);
         }
 
-        public static byte[] ReadFully(string input)
+        public static byte[] ReadFully(FileStream sourceFile, int i, int parts, ref int totalRead)
         {
-            FileStream sourceFile = new FileStream(input, FileMode.Open, FileAccess.Read); //Open streamer
-            BinaryReader binReader = new BinaryReader(sourceFile);
-            byte[] output = new byte[sourceFile.Length]; //create byte array of size file
-            for (long i = 0; i < sourceFile.Length; i++)
-                output[i] = binReader.ReadByte(); //read until done
-            sourceFile.Close(); //dispose streamer
-            binReader.Close(); //dispose reader
-            return output;
+            int read = 0;
+            int partSize = 0;
+            if (i < parts)
+            {
+                partSize = 8192;
+            }
+            else
+            {
+                partSize =  (int)sourceFile.Length - ( i*8192) ; 
+            }
+            byte[] total;
+            byte[] output = new byte[partSize];
+            while (read < partSize)
+            {
+                read = sourceFile.Read(output, read, partSize - read);
+            }
+            totalRead += read;
+            if (i == 0)
+            {
+                string response;
+                response = "REQ" + "10" + makeSizeText(sourceFile.Length + "") + makeSizeTwo((parts).ToString());
+                byte[] requestBytes = stringToBytes(response);
+                total = new byte[requestBytes.Length + output.Length];
+                System.Buffer.BlockCopy(requestBytes, 0, total, 0, requestBytes.Length);
+                System.Buffer.BlockCopy(output, 0, total, requestBytes.Length, output.Length);
+                return total;
+            }
+            else
+            {
+                return output;
+            }
+
         }
+
+        public static string makeSizeTwo(string size)
+        {
+            while (size.Length < 2)
+            {
+                size = "0" + size;
+            }
+            return size;
+        }
+
+
 
 
 

@@ -64,10 +64,20 @@ namespace Slasher.Client
 
         public string SendFile(string filePath)
         {
-            byte[] stream = Protocol.ReadFully(filePath);
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "10", System.Text.Encoding.ASCII.GetString(stream));
-            clientStream.Write(data, 0, data.Length);
+            FileStream sourceFile = new FileStream(filePath, FileMode.Open, FileAccess.Read); //Open streamer
+            BinaryReader binReader = new BinaryReader(sourceFile);
+            int parts = unchecked((int)sourceFile.Length) / 8192;
+            int totalRead = 0;
+            int count = 0;
+            for (int i = 0; i <= parts; i++)
+            {
+                byte[] total = Protocol.ReadFully(sourceFile, i, parts, ref totalRead);
+                clientStream.Write(total, 0, total.Length);
+                sourceFile.Seek(totalRead, SeekOrigin.Begin);
+            }
+            sourceFile.Close(); 
+            binReader.Close();
             return receiveData();
         }
 
