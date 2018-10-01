@@ -55,6 +55,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SurvivorsWinException.cs" />
     <Compile Include="UserIsDeadException.cs" />
+    <Compile Include="UserNotInMatchException.cs" />
     <Compile Include="UserTurnLimitException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

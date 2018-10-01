@@ -129,6 +129,7 @@ namespace Slasher.Client
                 switch (option)
                 {
                     case 1:
+                        SendCharacterType();
                         JoinToActiveMatch();
                         break;
                     case 2:
@@ -171,9 +172,9 @@ namespace Slasher.Client
                     {
                         Console.WriteLine(ex.Message);
                     }
-                    catch (EndOfMatchException)
+                    catch (EndOfMatchException ex)
                     {
-                        Console.WriteLine("Partida Terminada");
+                        Console.WriteLine(ex.Message);
                     }
                 }
                 showPreGameMenu();
@@ -195,8 +196,8 @@ namespace Slasher.Client
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
-                SendAvatar();
-                SendCharacterType();
+                //SendAvatar();
+                //SendCharacterType();
             }
             else
             {
@@ -216,7 +217,7 @@ namespace Slasher.Client
             catch (ClientException ex)
             {
                 Console.WriteLine(ex.Message);
-                SendAvatar();
+                SendCharacterType();
             }
         }
 

@@ -270,6 +270,11 @@ namespace Slasher.Server
             {
                 sendError(nws, "Debe esperar a que todos los jugadores realizan terminen su turno.");
             }
+            catch (UserNotInMatchException)
+            {
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "500");
+                nws.Write(responseStream, 0, responseStream.Length);
+            }
             catch (Exception)
             {
                 sendError(nws, "Ocurrió un error inesperado.");

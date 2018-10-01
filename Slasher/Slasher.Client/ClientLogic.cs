@@ -192,6 +192,10 @@ namespace Slasher.Client
                 string winners = dataResponse.Split('|')[1];
                 throw new EndOfMatchException("Partida finalizada, gana monstruo: " + winners);
             }
+            if (dataResponse.Contains("500"))
+            {
+                throw new EndOfMatchException("La partida caducó, debe registrarse a la partida actual para jugar.");
+            }
         }
 
         private void CheckOkResponse(byte[] data)

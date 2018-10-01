@@ -14,6 +14,7 @@ namespace Slasher.Entities
         public List<User> Users { get; set; }
         public User[,] Map { get; set; }
         public bool Active { get; set; }
+        public bool Restarting { get; set; }
         public enum Direction { UP, DOWN, LEFT, RIGHT }
         public static Dictionary<string, Direction> MovementCommands;
         private const int FIRST_ROW = 0;
@@ -22,6 +23,7 @@ namespace Slasher.Entities
         private const int LAST_COL = 7;
         private readonly object lockMap = new object();
         Thread timerThread;
+        Thread restartThread;
         public List<User> Winners { get; set; }
 
         public Match()
@@ -42,21 +44,34 @@ namespace Slasher.Entities
             Map = new User[8, 8];
             InitializeMap();
             Active = true;
+            Restarting = false;
             timerThread = new Thread(finishMatchByTime);
             timerThread.Start();
         }
 
         private void finishMatchByTime()
         {
-            Thread.Sleep(1800000);
+            Thread.Sleep(15000);
             lock (lockMap)
             {
                 if (Active)
                 {
+                    if (!Restarting)
+                    {
+                        restartThread = new Thread(BeginMatchRestart);
+                        restartThread.Start();
+                    }
                     Active = false;
                     IsThereSurvivorsLeft();
                 }
             }
+        }
+
+        private void BeginMatchRestart()
+        {
+            Restarting = true;
+            Thread.Sleep(10000);
+            StartMatch();
         }
 
         private void IsThereSurvivorsLeft()
@@ -119,20 +134,36 @@ namespace Slasher.Entities
         {
             lock (lockMap)
             {
-                if (user.Turn < 2)
+                if (Users.Contains(user))
                 {
-                    Tuple<int, int> position = FindUserPosition(user);
-                    MoveInsideBounds(position, direction);
-                    IsEmptySlot(user, position, direction);
-                    MovePlayerTile(user, position, direction);
-                    user.Turn = user.Turn + 1;
-                    CheckFinishedMatch();
-                    ProcessAllTurns();
-                    return GetCloseUsersList(user);
+                    if (Active)
+                    {
+                        if (user.Turn < 2)
+                        {
+                            Tuple<int, int> position = FindUserPosition(user);
+                            MoveInsideBounds(position, direction);
+                            IsEmptySlot(user, position, direction);
+                            MovePlayerTile(user, position, direction);
+                            user.Turn = user.Turn + 1;
+                            CheckFinishedMatch();
+                            ProcessAllTurns();
+                            return GetCloseUsersList(user);
+                        }
+                        else
+                        {
+                            throw new UserTurnLimitException();
+                        }
+                    }
+                    else
+                    {
+                        if (Winners.Count != 0)
+                            throw new SurvivorsWinException();
+                        throw new EndOfMatchException();
+                    }
                 }
                 else
                 {
-                    throw new UserTurnLimitException();
+                    throw new UserNotInMatchException();
                 }
             }
         }
@@ -160,6 +191,8 @@ namespace Slasher.Entities
                 {
                     Winners.Add(aliveUsers[0]);
                     Active = false;
+                    if (!Restarting)
+                        restartThread = new Thread(BeginMatchRestart);
                     throw new MonsterWinsException();
                 }
             }
@@ -183,6 +216,8 @@ namespace Slasher.Entities
             {
                 Winners = aliveUsers;
                 Active = false;
+                if (!Restarting)
+                    restartThread = new Thread(BeginMatchRestart);
                 throw new SurvivorsWinException();
             }
         }
@@ -270,35 +305,26 @@ namespace Slasher.Entities
 
         private void MovePlayerTile(User user, Tuple<int, int> position, Direction direction)
         {
-            if (Active)
+            switch (direction)
             {
-                switch (direction)
-                {
-                    case Direction.UP:
-                        Map[position.Item1, position.Item2] = null;
-                        Map[position.Item1 - 1, position.Item2] = user;
-                        break;
-                    case Direction.DOWN:
-                        Map[position.Item1, position.Item2] = null;
-                        Map[position.Item1 + 1, position.Item2] = user;
-                        break;
-                    case Direction.RIGHT:
-                        Map[position.Item1, position.Item2] = null;
-                        Map[position.Item1, position.Item2 + 1] = user;
-                        break;
-                    case Direction.LEFT:
-                        Map[position.Item1, position.Item2] = null;
-                        Map[position.Item1, position.Item2 - 1] = user;
-                        break;
-                    default:
-                        throw new InvalidMoveException();
-                }
-            }
-            else
-            {
-                if (Winners.Count != 0)
-                    throw new SurvivorsWinException();
-                throw new EndOfMatchException();
+                case Direction.UP:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1 - 1, position.Item2] = user;
+                    break;
+                case Direction.DOWN:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1 + 1, position.Item2] = user;
+                    break;
+                case Direction.RIGHT:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1, position.Item2 + 1] = user;
+                    break;
+                case Direction.LEFT:
+                    Map[position.Item1, position.Item2] = null;
+                    Map[position.Item1, position.Item2 - 1] = user;
+                    break;
+                default:
+                    throw new InvalidMoveException();
             }
         }
 
@@ -323,16 +349,39 @@ namespace Slasher.Entities
         {
             lock (lockMap)
             {
-                Tuple<int, int> position = FindUserPosition(user);
-                AttackInsideBounds(position, direction);
-                AttackTarget(user, position, direction);
-                user.Turn = user.Turn + 1;
-                CheckFinishedMatch();
-                ProcessAllTurns();
-                return GetCloseUsersList(user);
+                if (Users.Contains(user))
+                {
+                    if (Active)
+                    {
+                        if (user.Turn < 2)
+                        {
+                            Tuple<int, int> position = FindUserPosition(user);
+                            AttackInsideBounds(position, direction);
+                            AttackTarget(user, position, direction);
+                            user.Turn = user.Turn + 1;
+                            CheckFinishedMatch();
+                            ProcessAllTurns();
+                            return GetCloseUsersList(user);
+                        }
+                        else
+                        {
+                            throw new UserTurnLimitException();
+                        }
+                    }
+                    else
+                    {
+                        if (Winners.Count != 0)
+                            throw new SurvivorsWinException();
+                        throw new EndOfMatchException();
+                    }
+                }
+                else
+                {
+                    throw new UserNotInMatchException();
+                }
             }
         }
-
+        
         private void AttackInsideBounds(Tuple<int, int> position, Direction direction)
         {
             switch (direction)
