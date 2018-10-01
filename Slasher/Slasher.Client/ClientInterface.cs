@@ -127,6 +127,7 @@ namespace Slasher.Client
                 switch (option)
                 {
                     case 1:
+                        SendCharacterType();
                         JoinToActiveMatch();
                         break;
                     case 2:
@@ -169,9 +170,9 @@ namespace Slasher.Client
                     {
                         Console.WriteLine(ex.Message);
                     }
-                    catch (EndOfMatchException)
+                    catch (EndOfMatchException ex)
                     {
-                        Console.WriteLine("Partida Terminada");
+                        Console.WriteLine(ex.Message);
                     }
                 }
                 showPreGameMenu();
@@ -188,12 +189,12 @@ namespace Slasher.Client
             Console.WriteLine("REGISTRO DE USUARIO");
             Console.WriteLine("Ingrese un nombre de usuario");
             string nickname = Console.ReadLine();
-            bool added = clientLogic.connect(nickname, "192.168.1.46", 6000);
+            bool added = clientLogic.connect(nickname, "10.211.55.3", 6000);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
-                SendAvatar();
-                SendCharacterType();
+                //SendAvatar();
+                //SendCharacterType();
             }
             else
             {
@@ -213,7 +214,7 @@ namespace Slasher.Client
             catch (ClientException ex)
             {
                 Console.WriteLine(ex.Message);
-                SendAvatar();
+                SendCharacterType();
             }
         }
 

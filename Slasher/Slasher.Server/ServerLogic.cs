@@ -58,7 +58,7 @@ namespace Slasher.Server
 
         internal void ConnectServer()
         {
-            IPAddress ipAddress = IPAddress.Parse("192.168.1.46");
+            IPAddress ipAddress = IPAddress.Parse("10.211.55.3");
             Listener = new TcpListener(ipAddress, 6000);
             Connected = true;
             Console.WriteLine("local ip address: " + ipAddress);
@@ -238,6 +238,11 @@ namespace Slasher.Server
             catch (UserTurnLimitException)
             {
                 sendError(nws, "Debe esperar a que todos los jugadores realizan terminen su turno.");
+            }
+            catch (UserNotInMatchException)
+            {
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "500");
+                nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (Exception)
             {
