@@ -72,7 +72,6 @@ namespace Slasher.Entities
                 }
             }
         }
-
         private void InitializeMap()
         {
             for (int i = 0; i < 8; i++)

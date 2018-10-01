@@ -10,6 +10,7 @@ using System.Threading;
 using Protocols;
 using System.IO;
 using Exceptions;
+using System.Configuration;
 
 namespace Slasher.Server
 {
@@ -40,6 +41,7 @@ namespace Slasher.Server
             Listener.Stop();
             foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
             {
+                entry.Key.GetStream().Close();
                 entry.Key.Close();
                 entry.Value.Connected = false;
             }
@@ -58,7 +60,8 @@ namespace Slasher.Server
 
         internal void ConnectServer()
         {
-            IPAddress ipAddress = IPAddress.Parse("192.168.1.46");
+            string value = ConfigurationManager.AppSettings["IpConfiguration"];
+            IPAddress ipAddress = IPAddress.Parse(value);
             Listener = new TcpListener(ipAddress, 6000);
             Connected = true;
             Console.WriteLine("local ip address: " + ipAddress);
@@ -72,7 +75,9 @@ namespace Slasher.Server
                     Thread clientThread = new Thread(() => receiveCommands(tcpClient));
                     clientThread.Start();
                 }
-                catch (SocketException ex) { Console.WriteLine(ex.Message); }
+                catch (SocketException ex) {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
 
@@ -88,8 +93,34 @@ namespace Slasher.Server
                 else
                 {
                     user.Connected = false;
+                    showRegisteredPlayers();
+                    showConnectedPlayers();
                 }
             }
+        }
+
+        private void showConnectedPlayers()
+        {
+            string connectedPlayers = "Usuarios conectados: ";
+            foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
+            {
+                if (entry.Value.Connected)
+                {
+                    connectedPlayers += entry.Value.NickName + " \n";
+                }
+            }
+            Console.WriteLine(connectedPlayers);
+        }
+
+
+        private void showRegisteredPlayers()
+        {
+            string connectedPlayers = "Usuarios registrados: ";
+            foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
+            {
+                connectedPlayers += entry.Value.NickName + " \n";
+            }
+            Console.WriteLine(connectedPlayers);
         }
 
         private void executeCommand(byte[] headerInformation, TcpClient client, ref User user)
@@ -113,7 +144,7 @@ namespace Slasher.Server
                     byte[] partsInfoData = Protocol.GetData(client, 2);
                     string amountOfPartsString = UnicodeEncoding.ASCII.GetString(partsInfoData);
                     int amountOfParts = Int32.Parse(amountOfPartsString);
-                    downloadFile(RegisteredUsers[client].NickName, dataLength, amountOfParts,client);
+                    downloadFile(RegisteredUsers[client].NickName, dataLength, amountOfParts, client);
                     sendFileResponse(nws);
                     break;
                 case 15:
@@ -291,14 +322,30 @@ namespace Slasher.Server
                 if (!RegisteredUsers.ContainsValue(user))
                 {
                     RegisteredUsers.Add(client, user);
+                    showRegisteredPlayers();
+                    showConnectedPlayers();
                     responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
                 }
                 else
                 {
-                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "400");
+                    User userInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Value;
+                    TcpClient clientInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Key;
+                    if (userInServer.Connected)
+                    {
+                        responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "400");
+                    }
+                    else
+                    {
+
+                        RegisteredUsers.Remove(clientInServer);
+                        RegisteredUsers.Add(client, user);
+                        showRegisteredPlayers();
+                        showConnectedPlayers();
+                        responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
+                    }
                 }
+                nws.Write(responseStream, 0, responseStream.Length);
             }
-            nws.Write(responseStream, 0, responseStream.Length);
         }
 
         private void sendFileResponse(NetworkStream nws)
@@ -351,7 +398,7 @@ namespace Slasher.Server
               */
             byte[] totalFile = new byte[dataLength];
             int totalRead = 0;
-            for (int i = 0; i<=total; i++)
+            for (int i = 0; i <= total; i++)
             {
                 int partSize = 0;
                 if (i < total)

@@ -54,37 +54,7 @@ namespace Protocols
                     {
                         dataStream.Close();
                         tcpClient.Close();
-                        data = null;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    tcpClient.Close();
-                    return null;
-                }
-            }
-            return data;
-        }
-
-        public static byte[] GetDataFromFile(TcpClient tcpClient, int size)
-        {
-            int bufferSize = tcpClient.ReceiveBufferSize;
-            NetworkStream dataStream = tcpClient.GetStream();
-            byte[] data = new byte[size];
-            int pos = 0;
-            int currentData = 0;
-
-            while (pos < size)
-            {
-                try
-                {
-                    currentData = dataStream.Read(data, pos, size - pos);
-                    pos += currentData;
-                    if (currentData == 0)
-                    {
-                        dataStream.Close();
-                        tcpClient.Close();
+                        size = 0;
                         data = null;
                     }
                 }
@@ -255,10 +225,5 @@ namespace Protocols
             }
             return size;
         }
-
-
-
-
-
     }
 }

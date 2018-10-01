@@ -2,7 +2,9 @@
 using Slasher.Entities;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -188,7 +190,8 @@ namespace Slasher.Client
             Console.WriteLine("REGISTRO DE USUARIO");
             Console.WriteLine("Ingrese un nombre de usuario");
             string nickname = Console.ReadLine();
-            bool added = clientLogic.connect(nickname, "192.168.1.46", 6000);
+            string value = ConfigurationManager.AppSettings["IpConfiguration"];
+            bool added = clientLogic.connect(nickname, value, 6000);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
