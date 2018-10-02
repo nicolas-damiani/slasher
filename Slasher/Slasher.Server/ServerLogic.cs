@@ -21,7 +21,7 @@ namespace Slasher.Server
         private Dictionary<TcpClient, User> RegisteredUsers { get; set; }
         public bool Connected { get; set; }
         private static string startupPath = "Archivos";
-        private TcpListener Listener;
+        public TcpListener Listener;
         private object registrationLock;
 
 
@@ -39,6 +39,7 @@ namespace Slasher.Server
         internal void ShutDownConnections()
         {
             Listener.Stop();
+
             foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
             {
                 entry.Key.GetStream().Close();
@@ -68,8 +69,8 @@ namespace Slasher.Server
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine(ex.Message);
                 }
+
             }
         }
 
@@ -85,6 +86,7 @@ namespace Slasher.Server
                 else
                 {
                     user.Connected = false;
+                    Match.RemovePlayerFromWholeMatch(user);
                     showRegisteredPlayers();
                     showConnectedPlayers();
                 }

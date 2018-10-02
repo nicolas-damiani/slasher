@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -125,8 +126,9 @@ namespace Slasher.Client
             Console.WriteLine("2) DESCONECTARSE");
             Console.WriteLine("*******************************");
             int option = int.Parse(Console.ReadLine());
-            try { 
-            
+            try
+            {
+
                 switch (option)
                 {
                     case 1:
@@ -141,6 +143,10 @@ namespace Slasher.Client
                         Console.WriteLine("Comando invalido");
                         break;
                 }
+            }
+            catch (ObjectDisposedException e)
+            {
+                Console.WriteLine("Servidor no se encuentra conectado");
             }
             catch (Exception ex)
             {
@@ -234,7 +240,9 @@ namespace Slasher.Client
             {
                 Console.WriteLine(ex.Message);
                 SendAvatar();
-            }catch (Exception ex){
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex.Message);
                 SendAvatar();
             }

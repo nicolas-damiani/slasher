@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Slasher.Server
 {
@@ -25,8 +26,11 @@ namespace Slasher.Server
 
             Thread acceptConnections = new Thread(() => ServerLogic.ConnectServer());
             acceptConnections.Start();
+
             string exitCommand = Console.ReadLine();
             ServerLogic.ShutDownConnections();
+            Environment.Exit(0);
+            //ServerLogic.ShutDownConnections();
         }
     }
 }

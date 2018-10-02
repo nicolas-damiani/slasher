@@ -87,6 +87,7 @@ namespace Slasher.Entities
                 }
             }
         }
+
         private void InitializeMap()
         {
             for (int i = 0; i < 8; i++)
@@ -95,6 +96,16 @@ namespace Slasher.Entities
                 {
                     Map.SetValue(null, i, j);
                 }
+            }
+        }
+
+        public void RemovePlayerFromWholeMatch(User user)
+        {
+            if (Users.Contains(user))
+            {
+                Users.Remove(user);
+                Tuple<int, int> position = FindUserPosition(user);
+                Map[position.Item1, position.Item2] = null;
             }
         }
 
@@ -495,7 +506,6 @@ namespace Slasher.Entities
             user.Character.IsAlive = false;
             Tuple<int, int> position = FindUserPosition(user);
             Map[position.Item1, position.Item2] = null;
-            //VER SI HAY QUE NOTIFICAR A ALGUIEN
         }
 
         private User GetUserByPosition(Tuple<int, int> targetPosition)
