@@ -13,7 +13,9 @@ namespace Protocols
 
         public enum SendType { REQUEST, RESPONSE }
         public static int HEADER_SIZE = 7;
-        public static string OkResponse = "200";
+        public static int PART_SIZE = 8192;
+        public static string OK_RESPONSE_CODE = "200";
+        
 
         public static byte[] getStreamAuthenticationUser(string name)
         {
@@ -118,7 +120,7 @@ namespace Protocols
         {
             string responseText = Encoding.ASCII.GetString(response);
             string result = responseText.Substring(HEADER_SIZE + 5, 3);
-            if (result.Equals("200"))
+            if (result.Equals(OK_RESPONSE_CODE))
             {
                 return true;
             }
@@ -133,7 +135,7 @@ namespace Protocols
         {
             string responseText = Encoding.ASCII.GetString(response);
             string result = responseText.Substring(HEADER_SIZE + 5, 3);
-            if (result.Equals("200"))
+            if (result.Equals(OK_RESPONSE_CODE))
             {
                 return true;
             }
@@ -147,7 +149,7 @@ namespace Protocols
         {
             string responseText = Encoding.ASCII.GetString(response);
             string result = responseText.Substring(HEADER_SIZE + 5, 3);
-            if (result.Equals("200"))
+            if (result.Equals(OK_RESPONSE_CODE))
             {
                 return true;
             }
@@ -162,7 +164,7 @@ namespace Protocols
         {
             string responseText = Encoding.ASCII.GetString(response);
             string result = responseText.Substring(5 + HEADER_SIZE, 3);
-            if (result.Equals("200"))
+            if (result.Equals(OK_RESPONSE_CODE))
             {
                 Console.WriteLine("file saved");
                 return true;
@@ -187,11 +189,11 @@ namespace Protocols
             int partSize = 0;
             if (i < parts)
             {
-                partSize = 8192;
+                partSize = PART_SIZE;
             }
             else
             {
-                partSize =  (int)sourceFile.Length - ( i*8192) ; 
+                partSize =  (int)sourceFile.Length - ( i*PART_SIZE) ; 
             }
             byte[] total;
             byte[] output = new byte[partSize];

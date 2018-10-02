@@ -20,7 +20,7 @@ namespace Slasher.Server
         private List<TcpClient> TcpClients { get; set; }
         private Dictionary<TcpClient, User> RegisteredUsers { get; set; }
         public bool Connected { get; set; }
-        private static string startupPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Archivos";
+        private static string startupPath = "Archivos";
         private TcpListener Listener;
         private object registrationLock;
 
@@ -185,7 +185,7 @@ namespace Slasher.Server
             if (user.CharacterTypesCommand.ContainsKey(command))
             {
                 user.SetCharacterType(user.CharacterTypesCommand[command]);
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "16", "200");
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "16", Protocol.OK_RESPONSE_CODE);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             else
@@ -243,7 +243,7 @@ namespace Slasher.Server
                 {
                     winnersString += winner.NickName + ", ";
                 }
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "200");
+                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", Protocol.OK_RESPONSE_CODE);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (SurvivorsWinException)
@@ -290,7 +290,7 @@ namespace Slasher.Server
         private void checkMatchFinalizes(NetworkStream nws)
         {
             while (Match.Active) { };
-            byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "31", "200");
+            byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "31", Protocol.OK_RESPONSE_CODE);
             nws.Write(responseStream, 0, responseStream.Length);
         }
 
@@ -310,7 +310,7 @@ namespace Slasher.Server
                 {
                     Match.AddUserToMatch(user);
                 }
-                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "21", "200");
+                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "21", Protocol.OK_RESPONSE_CODE);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             else
@@ -329,7 +329,7 @@ namespace Slasher.Server
                     RegisteredUsers.Add(client, user);
                     showRegisteredPlayers();
                     showConnectedPlayers();
-                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
+                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", Protocol.OK_RESPONSE_CODE);
                 }
                 else
                 {
@@ -346,7 +346,7 @@ namespace Slasher.Server
                         RegisteredUsers.Add(client, user);
                         showRegisteredPlayers();
                         showConnectedPlayers();
-                        responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "200");
+                        responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", Protocol.OK_RESPONSE_CODE);
                     }
                 }
                 nws.Write(responseStream, 0, responseStream.Length);
@@ -356,7 +356,7 @@ namespace Slasher.Server
         private void sendFileResponse(NetworkStream nws)
         {
             byte[] responseStream;
-            responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "11", "200");
+            responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "11", Protocol.OK_RESPONSE_CODE);
             nws.Write(responseStream, 0, responseStream.Length);
         }
 
@@ -393,14 +393,6 @@ namespace Slasher.Server
 
         private static void downloadFile(string name, int dataLength, int total, TcpClient client)
         {
-            /*  if (File.Exists(startupPath + "\\" + name))
-              {
-                  File.Delete(startupPath + "\\" + name);
-              }
-              FileStream fs = File.Create(startupPath + "\\" + name);
-              fs.Write(fileData, 0, fileData.Length);
-              fs.Close();
-              */
             byte[] totalFile = new byte[dataLength];
             int totalRead = 0;
             for (int i = 0; i <= total; i++)
@@ -408,11 +400,11 @@ namespace Slasher.Server
                 int partSize = 0;
                 if (i < total)
                 {
-                    partSize = 8192;
+                    partSize = Protocol.PART_SIZE;
                 }
                 else
                 {
-                    partSize = (int)dataLength - (total * 8192);
+                    partSize = (int)dataLength - (total * Protocol.PART_SIZE);
                 }
 
                 byte[] partOfFile = Protocol.GetData(client, partSize);

@@ -75,7 +75,7 @@ namespace Slasher.Client
             NetworkStream clientStream = TcpClient.GetStream();
             FileStream sourceFile = new FileStream(filePath, FileMode.Open, FileAccess.Read); //Open streamer
             BinaryReader binReader = new BinaryReader(sourceFile);
-            int parts = unchecked((int)sourceFile.Length) / 8192;
+            int parts = unchecked((int)sourceFile.Length) / Protocol.PART_SIZE;
             int totalRead = 0;
             int count = 0;
             for (int i = 0; i <= parts; i++)
@@ -180,7 +180,7 @@ namespace Slasher.Client
         {
             InActiveMatch = false;
             string dataResponse = System.Text.Encoding.ASCII.GetString(data);
-            if (dataResponse.Equals("200"))
+            if (dataResponse.Equals(Protocol.OK_RESPONSE_CODE))
                 throw new EndOfMatchException("Partida finalizada, no hubieron ganadores.");
             if (dataResponse.Contains("300"))
             {
@@ -201,7 +201,7 @@ namespace Slasher.Client
         private void CheckOkResponse(byte[] data)
         {
             string dataResponse = System.Text.Encoding.ASCII.GetString(data);
-            if (!dataResponse.Contains(Protocol.OkResponse))
+            if (!dataResponse.Contains(Protocol.OK_RESPONSE_CODE))
                 throw new ClientException("Ocurrió un error inesperado.");
         }
 

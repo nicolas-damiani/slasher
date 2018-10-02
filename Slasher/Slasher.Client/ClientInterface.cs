@@ -74,6 +74,7 @@ namespace Slasher.Client
                         break;
                     case 2:
                         clientLogic.TcpClient.Close();
+
                         clientLogic.Connected = false;
                         break;
                     default:
@@ -196,7 +197,7 @@ namespace Slasher.Client
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
-                //SendAvatar();
+                SendAvatar();
                 //SendCharacterType();
             }
             else
@@ -231,6 +232,9 @@ namespace Slasher.Client
             }
             catch (ClientException ex)
             {
+                Console.WriteLine(ex.Message);
+                SendAvatar();
+            }catch (Exception ex){
                 Console.WriteLine(ex.Message);
                 SendAvatar();
             }
