@@ -51,7 +51,7 @@ namespace Slasher.Entities
 
         private void finishMatchByTime()
         {
-            Thread.Sleep(15000);
+            Thread.Sleep(180000);
             lock (lockMap)
             {
                 if (Active)
@@ -100,8 +100,14 @@ namespace Slasher.Entities
 
         public bool AddUserToMatch(User user)
         {
+            RestartUserData(user);
             Users.Add(user);
             return SetUserRandomPosition(user);
+        }
+
+        private void RestartUserData(User user)
+        {
+            user.Turn = 0;
         }
 
         private bool SetUserRandomPosition(User user)

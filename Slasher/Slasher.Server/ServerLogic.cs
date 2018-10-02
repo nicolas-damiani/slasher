@@ -259,7 +259,7 @@ namespace Slasher.Server
                 {
                     winnersString += winner.NickName + ", ";
                 }
-                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.END_OF_MATCH, "300|" + winnersString);
+                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.END_OF_MATCH, "400|" + winnersString);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (UserTurnLimitException)
