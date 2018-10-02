@@ -10,28 +10,9 @@ namespace Protocols
 {
     public static class Protocol
     {
-
-        public enum SendType { REQUEST, RESPONSE }
-        public static int HEADER_SIZE = 7;
-        public static int PART_SIZE = 8192;
-        public static string OK_RESPONSE_CODE = "200";
-        
-
-        public static byte[] getStreamAuthenticationUser(string name)
+        public static string makeSizeHeader(string size)
         {
-            string dataSize = name.Length.ToString();
-            while (dataSize.Length < HEADER_SIZE)
-            {
-                dataSize = "0" + dataSize;
-            }
-            string stream = "REQ" + "01" + dataSize + name;
-            return Encoding.ASCII.GetBytes(stream);
-        }
-
-
-        public static string makeSizeText(string size)
-        {
-            while (size.Length < HEADER_SIZE)
+            while (size.Length < ProtocolConstants.DATA_HEADER_SIZE)
             {
                 size = "0" + size;
             }
@@ -90,15 +71,15 @@ namespace Protocols
         public static int GetDataLength(byte[] data)
         {
             string result = System.Text.Encoding.ASCII.GetString(data);
-            string length = result.Substring(5, HEADER_SIZE);
+            string length = result.Substring(5, ProtocolConstants.DATA_HEADER_SIZE);
             int largoInt = Int32.Parse(length);
             return largoInt;
         }
 
-        public static byte[] GenerateStream(SendType type, string command, string data)
+        public static byte[] GenerateStream(ProtocolConstants.SendType type, int command, string data)
         {
             string request = "";
-            if (type == SendType.REQUEST)
+            if (type == ProtocolConstants.SendType.REQUEST)
             {
                 request += "REQ";
             }
@@ -106,7 +87,7 @@ namespace Protocols
             {
                 request += "RES";
             }
-            request += command + makeSizeText(data.Length.ToString()) + data;
+            request += makeSizeTwo(command.ToString()) + makeSizeHeader(data.Length.ToString()) + data;
             return stringToBytes(request);
         }
 
@@ -119,8 +100,8 @@ namespace Protocols
         public static bool checkIfLogged(byte[] response)
         {
             string responseText = Encoding.ASCII.GetString(response);
-            string result = responseText.Substring(HEADER_SIZE + 5, 3);
-            if (result.Equals(OK_RESPONSE_CODE))
+            string result = responseText.Substring(ProtocolConstants.HEADER_SIZE, 3);
+            if (result.Equals(ProtocolConstants.OK_RESPONSE_CODE))
             {
                 return true;
             }
@@ -131,55 +112,10 @@ namespace Protocols
             }
         }
 
-        public static bool checkIfMatchFinished(byte[] response)
-        {
-            string responseText = Encoding.ASCII.GetString(response);
-            string result = responseText.Substring(HEADER_SIZE + 5, 3);
-            if (result.Equals(OK_RESPONSE_CODE))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public static bool checkIfJoinedToMatch(byte[] response)
-        {
-            string responseText = Encoding.ASCII.GetString(response);
-            string result = responseText.Substring(HEADER_SIZE + 5, 3);
-            if (result.Equals(OK_RESPONSE_CODE))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-
-        public static bool checkIfFileOk(byte[] response)
-        {
-            string responseText = Encoding.ASCII.GetString(response);
-            string result = responseText.Substring(5 + HEADER_SIZE, 3);
-            if (result.Equals(OK_RESPONSE_CODE))
-            {
-                Console.WriteLine("file saved");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("file not saved");
-                return false;
-            }
-        }
-
         public static byte[] GenerateServerError(string message)
         {
             string response;
-            response = "RES" + "99" + makeSizeText(message.Length + "") + message;
+            response = "RES" + makeSizeTwo(ProtocolConstants.ERROR.ToString()) + makeSizeHeader(message.Length + "") + message;
             return stringToBytes(response);
         }
 
@@ -189,11 +125,11 @@ namespace Protocols
             int partSize = 0;
             if (i < parts)
             {
-                partSize = PART_SIZE;
+                partSize = ProtocolConstants.PART_SIZE;
             }
             else
             {
-                partSize =  (int)sourceFile.Length - ( i*PART_SIZE) ; 
+                partSize =  (int)sourceFile.Length - ( i* ProtocolConstants.PART_SIZE) ; 
             }
             byte[] total;
             byte[] output = new byte[partSize];
@@ -205,7 +141,7 @@ namespace Protocols
             if (i == 0)
             {
                 string response;
-                response = "REQ" + "10" + makeSizeText(sourceFile.Length + "") + makeSizeTwo((parts).ToString());
+                response = "REQ" + makeSizeTwo(ProtocolConstants.AVATAR_UPLOAD.ToString()) + makeSizeHeader(sourceFile.Length + "") + makeSizeTwo((parts).ToString());
                 byte[] requestBytes = stringToBytes(response);
                 total = new byte[requestBytes.Length + output.Length];
                 System.Buffer.BlockCopy(requestBytes, 0, total, 0, requestBytes.Length);

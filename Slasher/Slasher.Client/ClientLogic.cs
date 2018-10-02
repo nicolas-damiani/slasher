@@ -43,11 +43,11 @@ namespace Slasher.Client
         private bool authenticateClient(string name)
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "01", name);
+            byte[] data = Protocol.GenerateStream(ProtocolConstants.SendType.REQUEST, ProtocolConstants.LOGIN, name);
             clientStream.Write(data, 0, data.Length);
 
-            var response = new byte[Protocol.HEADER_SIZE + 8];
-            response = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 8);
+            var response = new byte[ProtocolConstants.DATA_HEADER_SIZE + 8];
+            response = Protocol.GetData(TcpClient, ProtocolConstants.DATA_HEADER_SIZE + 8);
             if (response != null)
                 return Protocol.checkIfLogged(response);
             return false;
@@ -57,7 +57,7 @@ namespace Slasher.Client
         public string SendMovement(string movement)
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "40", movement);
+            byte[] data = Protocol.GenerateStream(ProtocolConstants.SendType.REQUEST, ProtocolConstants.MOVEMENT, movement);
             clientStream.Write(data, 0, data.Length);
             return receiveData();
         }
@@ -65,7 +65,7 @@ namespace Slasher.Client
         public string SendAttack(string direction)
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "50", direction);
+            byte[] data = Protocol.GenerateStream(ProtocolConstants.SendType.REQUEST, ProtocolConstants.ATTACK, direction);
             clientStream.Write(data, 0, data.Length);
             return receiveData();
         }
@@ -75,9 +75,8 @@ namespace Slasher.Client
             NetworkStream clientStream = TcpClient.GetStream();
             FileStream sourceFile = new FileStream(filePath, FileMode.Open, FileAccess.Read); //Open streamer
             BinaryReader binReader = new BinaryReader(sourceFile);
-            int parts = unchecked((int)sourceFile.Length) / Protocol.PART_SIZE;
+            int parts = unchecked((int)sourceFile.Length) / ProtocolConstants.PART_SIZE;
             int totalRead = 0;
-            int count = 0;
             for (int i = 0; i <= parts; i++)
             {
                 byte[] total = Protocol.ReadFully(sourceFile, i, parts, ref totalRead);
@@ -89,18 +88,10 @@ namespace Slasher.Client
             return receiveData();
         }
 
-        internal string CheckGameStatus()
-        {
-            NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "30", "");
-            clientStream.Write(data, 0, data.Length);
-            return receiveData();
-        }
-
         internal string JoinActiveMatch()
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "20", "");
+            byte[] data = Protocol.GenerateStream(ProtocolConstants.SendType.REQUEST, ProtocolConstants.JOIN_MATCH, "");
             clientStream.Write(data, 0, data.Length);
             return receiveData();
         }
@@ -109,8 +100,8 @@ namespace Slasher.Client
         {
             try
             {
-                byte[] header = new byte[Protocol.HEADER_SIZE + 5];
-                header = Protocol.GetData(TcpClient, Protocol.HEADER_SIZE + 5);
+                byte[] header = new byte[ProtocolConstants.HEADER_SIZE];
+                header = Protocol.GetData(TcpClient, ProtocolConstants.HEADER_SIZE);
                 if (header != null)
                     return executeAction(header);
                 else
@@ -131,35 +122,31 @@ namespace Slasher.Client
             int action = Protocol.getCommandAction(header);
             switch (action)
             {
-                case 11:
+                case ProtocolConstants.AVATAR_UPLOAD:
                     CheckOkResponse(data);
                     return "Archivo subido correctamente.";
-                case 16:
+                case ProtocolConstants.SELECT_CHARACTER:
                     CheckOkResponse(data);
                     return "Tipo de jugador asignado correctamente.";
-                case 21:
+                case ProtocolConstants.JOIN_MATCH:
                     CheckOkResponse(data);
                     return "Unido a partida correctamente correctamente.";
-                case 31:
-                    CheckOkResponse(data);
-                    break;
-                case 41:
+                case ProtocolConstants.MOVEMENT:
                     CheckOkResponse(data);
                     return movementResponse(data);
-                case 51:
+                case ProtocolConstants.ATTACK:
                     CheckOkResponse(data);
                     return attackResponse(data);
-                case 61:
+                case ProtocolConstants.END_OF_MATCH:
                     finishActiveMatch(data);
                     return attackResponse(data);
-                case 99:
+                case ProtocolConstants.ERROR:
                     serverError(data);
                     return "";
                 
                 default:
                     return "";
             }
-            return "";
         }
 
         private string movementResponse(byte[] data)
@@ -180,7 +167,7 @@ namespace Slasher.Client
         {
             InActiveMatch = false;
             string dataResponse = System.Text.Encoding.ASCII.GetString(data);
-            if (dataResponse.Equals(Protocol.OK_RESPONSE_CODE))
+            if (dataResponse.Equals(ProtocolConstants.OK_RESPONSE_CODE))
                 throw new EndOfMatchException("Partida finalizada, no hubieron ganadores.");
             if (dataResponse.Contains("300"))
             {
@@ -201,7 +188,7 @@ namespace Slasher.Client
         private void CheckOkResponse(byte[] data)
         {
             string dataResponse = System.Text.Encoding.ASCII.GetString(data);
-            if (!dataResponse.Contains(Protocol.OK_RESPONSE_CODE))
+            if (!dataResponse.Contains(ProtocolConstants.OK_RESPONSE_CODE))
                 throw new ClientException("Ocurrió un error inesperado.");
         }
 
@@ -213,7 +200,7 @@ namespace Slasher.Client
         internal string SendCharacterType(string characterType)
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            byte[] data = Protocol.GenerateStream(Protocol.SendType.REQUEST, "15", characterType);
+            byte[] data = Protocol.GenerateStream(ProtocolConstants.SendType.REQUEST, ProtocolConstants.SELECT_CHARACTER, characterType);
             clientStream.Write(data, 0, data.Length);
             return receiveData();
         }

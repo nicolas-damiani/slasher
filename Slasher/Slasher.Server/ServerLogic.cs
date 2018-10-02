@@ -48,21 +48,12 @@ namespace Slasher.Server
             Connected = false;
         }
 
-        internal List<User> GetPossibleUsersToAdd()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void AcceptUser(User user)
-        {
-            throw new NotImplementedException();
-        }
-
         internal void ConnectServer()
         {
-            string value = ConfigurationManager.AppSettings["IpConfiguration"];
-            IPAddress ipAddress = IPAddress.Parse(value);
-            Listener = new TcpListener(ipAddress, 6000);
+            string ipString = ConfigurationManager.AppSettings["IpConfiguration"];
+            int port = int.Parse(ConfigurationManager.AppSettings["Port"]);
+            IPAddress ipAddress = IPAddress.Parse(ipString);
+            Listener = new TcpListener(ipAddress, port);
             Connected = true;
             Console.WriteLine("local ip address: " + ipAddress);
             Listener.Start();
@@ -75,7 +66,8 @@ namespace Slasher.Server
                     Thread clientThread = new Thread(() => receiveCommands(tcpClient));
                     clientThread.Start();
                 }
-                catch (SocketException ex) {
+                catch (SocketException ex)
+                {
                     Console.WriteLine(ex.Message);
                 }
             }
@@ -86,8 +78,8 @@ namespace Slasher.Server
             User user = new User();
             while (user.Connected)
             {
-                byte[] headerInformation = new byte[Protocol.HEADER_SIZE + 5];
-                headerInformation = Protocol.GetData(client, Protocol.HEADER_SIZE + 5);
+                byte[] headerInformation = new byte[ProtocolConstants.HEADER_SIZE];
+                headerInformation = Protocol.GetData(client, ProtocolConstants.HEADER_SIZE);
                 if (headerInformation != null)
                     executeCommand(headerInformation, client, ref user);
                 else
@@ -126,57 +118,61 @@ namespace Slasher.Server
         private void executeCommand(byte[] headerInformation, TcpClient client, ref User user)
         {
             NetworkStream nws = client.GetStream();
-            int dataLength = Protocol.GetDataLength(headerInformation);
-            int command = Protocol.getCommandAction(headerInformation);
-
-            switch (command)
+            try
             {
-                case 01:
-                    {
-                        byte[] data = new byte[dataLength];
-                        data = Protocol.GetData(client, dataLength);
-                        string name = UnicodeEncoding.ASCII.GetString(data);
-                        user.NickName = name;
-                        sendAuthorizatonData(name, nws, client, ref user);
+                int dataLength = Protocol.GetDataLength(headerInformation);
+                int command = Protocol.getCommandAction(headerInformation);
+
+                switch (command)
+                {
+                    case ProtocolConstants.LOGIN:
+                        {
+                            byte[] data = new byte[dataLength];
+                            data = Protocol.GetData(client, dataLength);
+                            string name = UnicodeEncoding.ASCII.GetString(data);
+                            user.NickName = name;
+                            sendAuthorizatonData(name, nws, client, ref user);
+                            break;
+                        }
+                    case ProtocolConstants.AVATAR_UPLOAD:
+                        byte[] partsInfoData = Protocol.GetData(client, 2);
+                        string amountOfPartsString = UnicodeEncoding.ASCII.GetString(partsInfoData);
+                        int amountOfParts = Int32.Parse(amountOfPartsString);
+                        downloadFile(RegisteredUsers[client].NickName, dataLength, amountOfParts, client);
+                        sendFileResponse(nws);
                         break;
-                    }
-                case 10:
-                    byte[] partsInfoData = Protocol.GetData(client, 2);
-                    string amountOfPartsString = UnicodeEncoding.ASCII.GetString(partsInfoData);
-                    int amountOfParts = Int32.Parse(amountOfPartsString);
-                    downloadFile(RegisteredUsers[client].NickName, dataLength, amountOfParts, client);
-                    sendFileResponse(nws);
-                    break;
-                case 15:
-                    {
-                        byte[] data = new byte[dataLength];
-                        data = Protocol.GetData(client, dataLength);
-                        selectCharacterType(RegisteredUsers[client], nws, data);
+                    case ProtocolConstants.SELECT_CHARACTER:
+                        {
+                            byte[] data = new byte[dataLength];
+                            data = Protocol.GetData(client, dataLength);
+                            selectCharacterType(RegisteredUsers[client], nws, data);
+                            break;
+                        }
+                    case ProtocolConstants.JOIN_MATCH:
+                        joinMatch(RegisteredUsers[client], nws);
                         break;
-                    }
-                case 20:
-                    joinMatch(RegisteredUsers[client], nws);
-                    break;
-                case 30:
-                    respondWhenMatchFinishes(nws);
-                    break;
-                case 40:
-                    {
-                        byte[] data = new byte[dataLength];
-                        data = Protocol.GetData(client, dataLength);
-                        string movement = UnicodeEncoding.ASCII.GetString(data);
-                        playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
-                        break;
-                    }
-                case 50:
-                    {
-                        byte[] data = new byte[dataLength];
-                        data = Protocol.GetData(client, dataLength);
-                        string attackDirection = UnicodeEncoding.ASCII.GetString(data);
-                        playerAction(nws, RegisteredUsers[client], attackDirection, ActionType.ATTACK);
-                        break;
-                    }
-            };
+                    case ProtocolConstants.MOVEMENT:
+                        {
+                            byte[] data = new byte[dataLength];
+                            data = Protocol.GetData(client, dataLength);
+                            string movement = UnicodeEncoding.ASCII.GetString(data);
+                            playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
+                            break;
+                        }
+                    case ProtocolConstants.ATTACK:
+                        {
+                            byte[] data = new byte[dataLength];
+                            data = Protocol.GetData(client, dataLength);
+                            string attackDirection = UnicodeEncoding.ASCII.GetString(data);
+                            playerAction(nws, RegisteredUsers[client], attackDirection, ActionType.ATTACK);
+                            break;
+                        }
+                };
+            }
+            catch (Exception)
+            {
+                sendError(nws, "Ocurrió un error inesperado.");
+            }
         }
 
         private void selectCharacterType(User user, NetworkStream nws, byte[] data)
@@ -185,7 +181,7 @@ namespace Slasher.Server
             if (user.CharacterTypesCommand.ContainsKey(command))
             {
                 user.SetCharacterType(user.CharacterTypesCommand[command]);
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "16", Protocol.OK_RESPONSE_CODE);
+                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.SELECT_CHARACTER, ProtocolConstants.OK_RESPONSE_CODE);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             else
@@ -202,7 +198,7 @@ namespace Slasher.Server
                     if (Match.MovementCommands.ContainsKey(direction))
                     {
                         string closePlayers = Match.MovePlayer(user, Match.MovementCommands[direction]);
-                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "41", "200|" + closePlayers);
+                        byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.MOVEMENT, "200|" + closePlayers);
                         nws.Write(responseStream, 0, responseStream.Length);
                     }
                     else
@@ -213,7 +209,7 @@ namespace Slasher.Server
                     if (Match.MovementCommands.ContainsKey(direction))
                     {
                         string attackResponse = Match.PlayerAttack(user, Match.MovementCommands[direction]);
-                        byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "51", "200|" + attackResponse);
+                        byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.ATTACK, "200|" + attackResponse);
                         nws.Write(responseStream, 0, responseStream.Length);
                     }
                     else
@@ -243,7 +239,7 @@ namespace Slasher.Server
                 {
                     winnersString += winner.NickName + ", ";
                 }
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", Protocol.OK_RESPONSE_CODE);
+                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.END_OF_MATCH, ProtocolConstants.OK_RESPONSE_CODE);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (SurvivorsWinException)
@@ -253,7 +249,7 @@ namespace Slasher.Server
                 {
                     winnersString += winner.NickName + ", ";
                 }
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "300|" + winnersString);
+                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.END_OF_MATCH, "300|" + winnersString);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (MonsterWinsException)
@@ -263,7 +259,7 @@ namespace Slasher.Server
                 {
                     winnersString += winner.NickName + ", ";
                 }
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "300|" + winnersString);
+                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.END_OF_MATCH, "300|" + winnersString);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (UserTurnLimitException)
@@ -272,26 +268,13 @@ namespace Slasher.Server
             }
             catch (UserNotInMatchException)
             {
-                byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "61", "500");
+                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.END_OF_MATCH, "500");
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             catch (Exception)
             {
                 sendError(nws, "Ocurrió un error inesperado.");
             }
-        }
-
-        private void respondWhenMatchFinishes(NetworkStream nws)
-        {
-            Thread matchFinishesThread = new Thread(() => checkMatchFinalizes(nws));
-            matchFinishesThread.Start();
-        }
-
-        private void checkMatchFinalizes(NetworkStream nws)
-        {
-            while (Match.Active) { };
-            byte[] responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "31", Protocol.OK_RESPONSE_CODE);
-            nws.Write(responseStream, 0, responseStream.Length);
         }
 
 
@@ -310,7 +293,7 @@ namespace Slasher.Server
                 {
                     Match.AddUserToMatch(user);
                 }
-                responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "21", Protocol.OK_RESPONSE_CODE);
+                responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.JOIN_MATCH, ProtocolConstants.OK_RESPONSE_CODE);
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             else
@@ -329,7 +312,7 @@ namespace Slasher.Server
                     RegisteredUsers.Add(client, user);
                     showRegisteredPlayers();
                     showConnectedPlayers();
-                    responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", Protocol.OK_RESPONSE_CODE);
+                    responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, ProtocolConstants.OK_RESPONSE_CODE);
                 }
                 else
                 {
@@ -337,7 +320,7 @@ namespace Slasher.Server
                     TcpClient clientInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Key;
                     if (userInServer.Connected)
                     {
-                        responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", "400");
+                        responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, "400");
                     }
                     else
                     {
@@ -346,7 +329,7 @@ namespace Slasher.Server
                         RegisteredUsers.Add(client, user);
                         showRegisteredPlayers();
                         showConnectedPlayers();
-                        responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "01", Protocol.OK_RESPONSE_CODE);
+                        responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, ProtocolConstants.OK_RESPONSE_CODE);
                     }
                 }
                 nws.Write(responseStream, 0, responseStream.Length);
@@ -356,39 +339,14 @@ namespace Slasher.Server
         private void sendFileResponse(NetworkStream nws)
         {
             byte[] responseStream;
-            responseStream = Protocol.GenerateStream(Protocol.SendType.RESPONSE, "11", Protocol.OK_RESPONSE_CODE);
+            responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.AVATAR_UPLOAD, ProtocolConstants.OK_RESPONSE_CODE);
             nws.Write(responseStream, 0, responseStream.Length);
         }
 
-        internal List<User> GetRegisteredUsers()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal List<User> GetConnectedPlayers()
-        {
-            throw new NotImplementedException();
-        }
 
         internal bool CanStartMatch()
         {
             return !Match.Active;
-        }
-
-        public static void SaveBytesToFile(string filename, byte[] bytesToWrite)
-        {
-            filename = "C:\\Users\\Usuario\\Desktop";
-            if (filename != null && filename.Length > 0 && bytesToWrite != null)
-            {
-                if (!Directory.Exists(Path.GetDirectoryName(filename)))
-                    Directory.CreateDirectory(Path.GetDirectoryName(filename));
-
-                FileStream file = File.Create(filename);
-
-                file.Write(bytesToWrite, 0, bytesToWrite.Length);
-
-                file.Close();
-            }
         }
 
         private static void downloadFile(string name, int dataLength, int total, TcpClient client)
@@ -400,11 +358,11 @@ namespace Slasher.Server
                 int partSize = 0;
                 if (i < total)
                 {
-                    partSize = Protocol.PART_SIZE;
+                    partSize = ProtocolConstants.PART_SIZE;
                 }
                 else
                 {
-                    partSize = (int)dataLength - (total * Protocol.PART_SIZE);
+                    partSize = (int)dataLength - (total * ProtocolConstants.PART_SIZE);
                 }
 
                 byte[] partOfFile = Protocol.GetData(client, partSize);

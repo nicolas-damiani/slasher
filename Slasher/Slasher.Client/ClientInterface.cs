@@ -193,12 +193,12 @@ namespace Slasher.Client
             Console.WriteLine("Ingrese un nombre de usuario");
             string nickname = Console.ReadLine();
             string value = ConfigurationManager.AppSettings["IpConfiguration"];
-            bool added = clientLogic.connect(nickname, value, 6000);
+            int port = int.Parse(ConfigurationManager.AppSettings["Port"]);
+            bool added = clientLogic.connect(nickname, value, port);
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
                 SendAvatar();
-                //SendCharacterType();
             }
             else
             {
