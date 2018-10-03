@@ -11,7 +11,7 @@ namespace Protocols
 
 
         public enum SendType { REQUEST, RESPONSE }
-        public static int DATA_HEADER_SIZE = 7;
+        public static int DATA_HEADER_SIZE = 8;
         public static int HEADER_SIZE = 5 + DATA_HEADER_SIZE;
         public static int PART_SIZE = 8192;
         public static string OK_RESPONSE_CODE = "200";

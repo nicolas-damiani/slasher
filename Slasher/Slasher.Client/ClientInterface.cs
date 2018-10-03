@@ -204,7 +204,7 @@ namespace Slasher.Client
             if (added)
             {
                 Console.WriteLine("El usuario fue agregado exitosamente!");
-                //SendAvatar();
+                SendAvatar();
             }
             else
             {
