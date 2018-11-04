@@ -63,7 +63,7 @@ namespace Protocols
         public static int getTotalPartsFromFile(byte[] stream)
         {
             string resultString = System.Text.Encoding.ASCII.GetString(stream);
-            string commandCodeString = resultString.Substring(0, 2);
+            string commandCodeString = resultString.Substring(0, 3);
             int commandCode = Int32.Parse(commandCodeString);
             return commandCode;
         }
@@ -158,6 +158,17 @@ namespace Protocols
         public static string makeSizeTwo(string size)
         {
             while (size.Length < 2)
+            {
+                size = "0" + size;
+            }
+            return size;
+        }
+
+
+
+        public static string makeSizeThree(string size)
+        {
+            while (size.Length < 3)
             {
                 size = "0" + size;
             }

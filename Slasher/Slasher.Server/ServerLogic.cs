@@ -42,9 +42,13 @@ namespace Slasher.Server
 
             foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
             {
-                entry.Key.GetStream().Close();
-                entry.Key.Close();
-                entry.Value.Connected = false;
+                try
+                {
+                    entry.Key.GetStream().Close();
+                    entry.Key.Close();
+                    entry.Value.Connected = false;
+                }
+                catch (ObjectDisposedException) { }
             }
             Connected = false;
         }
@@ -69,6 +73,10 @@ namespace Slasher.Server
                 }
                 catch (SocketException ex)
                 {
+                }
+                catch (System.InvalidOperationException)
+                {
+
                 }
 
             }
@@ -137,7 +145,7 @@ namespace Slasher.Server
                             break;
                         }
                     case ProtocolConstants.AVATAR_UPLOAD:
-                        byte[] partsInfoData = Protocol.GetData(client, 2);
+                        byte[] partsInfoData = Protocol.GetData(client, 3);
                         string amountOfPartsString = UnicodeEncoding.ASCII.GetString(partsInfoData);
                         int amountOfParts = Int32.Parse(amountOfPartsString);
                         downloadFile(RegisteredUsers[client].NickName, dataLength, amountOfParts, client);
@@ -267,6 +275,10 @@ namespace Slasher.Server
             catch (UserTurnLimitException)
             {
                 sendError(nws, "Debe esperar a que todos los jugadores realizan terminen su turno.");
+            }
+            catch (EmptyAttackTargetException)
+            {
+                sendError(nws, "No se encuentra nadie en el lugar que desea atacar");
             }
             catch (UserNotInMatchException)
             {

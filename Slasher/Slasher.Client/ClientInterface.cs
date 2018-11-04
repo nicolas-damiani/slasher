@@ -3,6 +3,7 @@ using Slasher.Entities;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -75,13 +76,15 @@ namespace Slasher.Client
                         break;
                     case 2:
                         clientLogic.TcpClient.Close();
-
                         clientLogic.Connected = false;
                         break;
                     default:
                         Console.WriteLine("Comando invalido");
                         break;
                 }
+            }
+            catch (SessionEndedException)
+            {
             }
             catch (Exception ex)
             {
@@ -105,7 +108,7 @@ namespace Slasher.Client
                     clientLogic.Connected = false;
                     clientLogic.InActiveMatch = false;
                     Console.WriteLine("Sesión desconectada.");
-                    break;
+                    throw new SessionEndedException();
                 default:
                     Console.WriteLine("Comando invalido");
                     break;
@@ -138,20 +141,22 @@ namespace Slasher.Client
                     case 2:
                         clientLogic.TcpClient.Close();
                         clientLogic.Connected = false;
+                        throw new SessionEndedException();
                         break;
                     default:
                         Console.WriteLine("Comando invalido");
+                        showPreGameMenu();
                         break;
                 }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Comando invalido");
+                showPreGameMenu();
             }
             catch (ObjectDisposedException e)
             {
                 Console.WriteLine("Servidor no se encuentra conectado");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                showPreGameMenu();
             }
 
         }
@@ -241,7 +246,7 @@ namespace Slasher.Client
                 Console.WriteLine(ex.Message);
                 SendAvatar();
             }
-            catch (Exception ex)
+            catch (FileNotFoundException ex)
             {
                 Console.WriteLine(ex.Message);
                 SendAvatar();

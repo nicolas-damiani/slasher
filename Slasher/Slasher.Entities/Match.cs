@@ -41,7 +41,7 @@ namespace Slasher.Entities
         {
             Users = new List<User>();
             Winners = new List<User>();
-            Map = new User[8, 8];
+            Map = new User[LAST_ROW+1, LAST_COL+1];
             InitializeMap();
             Active = true;
             Restarting = false;
@@ -90,9 +90,9 @@ namespace Slasher.Entities
 
         private void InitializeMap()
         {
-            for (int i = 0; i < 8; i++)
+            for (int i = FIRST_ROW; i < LAST_ROW+1; i++)
             {
-                for (int j = 0; j < 8; j++)
+                for (int j = FIRST_COL; j < LAST_COL+1; j++)
                 {
                     Map.SetValue(null, i, j);
                 }
@@ -127,8 +127,8 @@ namespace Slasher.Entities
             bool assigned = false;
             while (!assigned)
             {
-                int row = random.Next(0, 7);
-                int col = random.Next(0, 7);
+                int row = random.Next(FIRST_ROW, LAST_ROW);
+                int col = random.Next(FIRST_COL, LAST_COL);
                 lock (lockMap)
                 {
                     if (Map[row, col] == null)
@@ -348,9 +348,9 @@ namespace Slasher.Entities
         private Tuple<int, int> FindUserPosition(User user)
         {
             Tuple<int, int> returnTuple = null;
-            for (int i = 0; i < 8; i++)
+            for (int i = FIRST_ROW; i < LAST_ROW + 1; i++)
             {
-                for (int j = 0; j < 8; j++)
+                for (int j = FIRST_COL; j < LAST_COL + 1; j++)
                 {
                     if (Map[i, j] != null && Map[i, j].Equals(user))
                         returnTuple = new Tuple<int, int>(i, j);

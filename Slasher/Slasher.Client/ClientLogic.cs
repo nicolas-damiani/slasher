@@ -73,7 +73,7 @@ namespace Slasher.Client
         public string SendFile(string filePath)
         {
             NetworkStream clientStream = TcpClient.GetStream();
-            FileStream sourceFile = new FileStream(filePath, FileMode.Open, FileAccess.Read); //Open streamer
+            FileStream sourceFile = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             BinaryReader binReader = new BinaryReader(sourceFile);
             int parts = unchecked((int)sourceFile.Length) / ProtocolConstants.PART_SIZE;
             int totalRead = 0;
@@ -105,7 +105,7 @@ namespace Slasher.Client
                 if (header != null)
                     return executeAction(header);
                 else
-                    return "Ocurrio un error inesperado";
+                    throw new SessionEndedException();
             }
             catch (SocketException ex)
             {
