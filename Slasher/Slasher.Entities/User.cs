@@ -28,6 +28,18 @@ namespace Slasher.Entities
             };
         }
 
+        public User(string nickname)
+        {
+            NickName = nickname;
+            Connected = true;
+            Turn = 0;
+            CharacterTypesCommand = new Dictionary<string, CharacterType>()
+            {
+                { "monstruo", CharacterType.MONSTER },
+                { "sobreviviente", CharacterType.SURVIVOR},
+            };
+        }
+
         public User()
         {
             Connected = true;

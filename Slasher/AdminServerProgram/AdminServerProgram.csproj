@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{94BE0A53-D0AF-4277-895D-B3FD575F30B8}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{8104DE1D-DCDF-49A0-B31B-6402263FC96F}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Exceptions</RootNamespace>
-    <AssemblyName>Exceptions</AssemblyName>
+    <RootNamespace>AdminServerProgram</RootNamespace>
+    <AssemblyName>AdminServerProgram</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,23 +44,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientException.cs" />
-    <Compile Include="EndOfMatchException.cs" />
-    <Compile Include="AttackOutOfBoundsException.cs" />
-    <Compile Include="EmptyAttackTargetException.cs" />
-    <Compile Include="InvalidSurvivorAttackException.cs" />
-    <Compile Include="MonsterWinsException.cs" />
-    <Compile Include="MoveOutOfBoundsException.cs" />
-    <Compile Include="InvalidAttackException.cs" />
-    <Compile Include="InvalidMoveException.cs" />
-    <Compile Include="OccupiedSlotException.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerSystemException.cs" />
-    <Compile Include="SessionEndedException.cs" />
-    <Compile Include="SurvivorsWinException.cs" />
-    <Compile Include="UserIsDeadException.cs" />
-    <Compile Include="UserNotInMatchException.cs" />
-    <Compile Include="UserTurnLimitException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Exceptions\Exceptions.csproj">
+      <Project>{94BE0A53-D0AF-4277-895D-B3FD575F30B8}</Project>
+      <Name>Exceptions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Slasher.Entities\Slasher.Entities.csproj">
+      <Project>{3DDE6871-4FCF-42CD-855C-3978612A77B2}</Project>
+      <Name>Slasher.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Slasher.Server\Slasher.Server.csproj">
+      <Project>{130CC6BE-2E13-48C2-9E56-E5E85451954A}</Project>
+      <Name>Slasher.Server</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>

@@ -11,15 +11,19 @@ using Protocols;
 using System.IO;
 using Exceptions;
 using System.Configuration;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels.Tcp;
+using System.Collections;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Serialization.Formatters;
 
 namespace Slasher.Server
 {
     class ServerLogic
     {
         public Match Match { get; set; }
-        private List<TcpClient> TcpClients { get; set; }
-        private Dictionary<TcpClient, User> RegisteredUsers { get; set; }
         public bool Connected { get; set; }
+        public ServerSystemController ServerSystemController { get; set; }
         private static string startupPath = "Archivos";
         public TcpListener Listener;
         private object registrationLock;
@@ -27,12 +31,25 @@ namespace Slasher.Server
 
         public ServerLogic()
         {
-            TcpClients = new List<TcpClient>();
             Match = new Match();
-            RegisteredUsers = new Dictionary<TcpClient, User>();
             registrationLock = new object();
             Match = new Match();
             Match.StartMatch();
+
+
+            IDictionary props = new Hashtable();
+            props["port"] = 1234;
+            BinaryServerFormatterSinkProvider serverProvider =
+                new BinaryServerFormatterSinkProvider();
+            serverProvider.TypeFilterLevel = TypeFilterLevel.Full;
+            TcpChannel chan = new TcpChannel(props, null, serverProvider);
+
+            ChannelServices.RegisterChannel(chan, false);
+
+            ServerSystemController = (ServerSystemController)Activator.GetObject(
+                            typeof(ServerSystemController),
+                            "ServerSystemControllerUri",
+                            WellKnownObjectMode.Singleton);
 
         }
 
@@ -40,7 +57,7 @@ namespace Slasher.Server
         {
             Listener.Stop();
 
-            foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
+            foreach (KeyValuePair<TcpClient, User> entry in ServerSystemController.GetRegisteredUsers())
             {
                 try
                 {
@@ -67,7 +84,6 @@ namespace Slasher.Server
                 try
                 {
                     TcpClient tcpClient = Listener.AcceptTcpClient();
-                    TcpClients.Add(tcpClient);
                     Thread clientThread = new Thread(() => receiveCommands(tcpClient));
                     clientThread.Start();
                 }
@@ -104,7 +120,7 @@ namespace Slasher.Server
         private void showConnectedPlayers()
         {
             string connectedPlayers = "Usuarios conectados: ";
-            foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
+            foreach (KeyValuePair<TcpClient, User> entry in ServerSystemController.GetRegisteredUsers())
             {
                 if (entry.Value.Connected)
                 {
@@ -118,7 +134,7 @@ namespace Slasher.Server
         private void showRegisteredPlayers()
         {
             string connectedPlayers = "Usuarios registrados: ";
-            foreach (KeyValuePair<TcpClient, User> entry in RegisteredUsers)
+            foreach (KeyValuePair<TcpClient, User> entry in ServerSystemController.GetRegisteredUsers())
             {
                 connectedPlayers += entry.Value.NickName + " \n";
             }
@@ -128,6 +144,8 @@ namespace Slasher.Server
         private void executeCommand(byte[] headerInformation, TcpClient client, ref User user)
         {
             NetworkStream nws = client.GetStream();
+            Dictionary<TcpClient, User> registeredUsers = ServerSystemController.GetRegisteredUsers();
+
             try
             {
                 int dataLength = Protocol.GetDataLength(headerInformation);
@@ -148,25 +166,25 @@ namespace Slasher.Server
                         byte[] partsInfoData = Protocol.GetData(client, 3);
                         string amountOfPartsString = UnicodeEncoding.ASCII.GetString(partsInfoData);
                         int amountOfParts = Int32.Parse(amountOfPartsString);
-                        downloadFile(RegisteredUsers[client].NickName, dataLength, amountOfParts, client);
+                        downloadFile(registeredUsers[client].NickName, dataLength, amountOfParts, client);
                         sendFileResponse(nws);
                         break;
                     case ProtocolConstants.SELECT_CHARACTER:
                         {
                             byte[] data = new byte[dataLength];
                             data = Protocol.GetData(client, dataLength);
-                            selectCharacterType(RegisteredUsers[client], nws, data);
+                            selectCharacterType(registeredUsers[client], nws, data);
                             break;
                         }
                     case ProtocolConstants.JOIN_MATCH:
-                        joinMatch(RegisteredUsers[client], nws);
+                        joinMatch(registeredUsers[client], nws);
                         break;
                     case ProtocolConstants.MOVEMENT:
                         {
                             byte[] data = new byte[dataLength];
                             data = Protocol.GetData(client, dataLength);
                             string movement = UnicodeEncoding.ASCII.GetString(data);
-                            playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
+                            playerAction(nws, registeredUsers[client], movement, ActionType.MOVEMENT);
                             break;
                         }
                     case ProtocolConstants.ATTACK:
@@ -174,7 +192,7 @@ namespace Slasher.Server
                             byte[] data = new byte[dataLength];
                             data = Protocol.GetData(client, dataLength);
                             string attackDirection = UnicodeEncoding.ASCII.GetString(data);
-                            playerAction(nws, RegisteredUsers[client], attackDirection, ActionType.ATTACK);
+                            playerAction(nws, registeredUsers[client], attackDirection, ActionType.ATTACK);
                             break;
                         }
                 };
@@ -318,29 +336,29 @@ namespace Slasher.Server
 
         private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client, ref User user)
         {
+            Dictionary<TcpClient, User> registeredUsers = ServerSystemController.GetRegisteredUsers();
             byte[] responseStream;
             lock (registrationLock)
             {
-                if (!RegisteredUsers.ContainsValue(user))
+                if (!registeredUsers.ContainsValue(user))
                 {
-                    RegisteredUsers.Add(client, user);
+                    registeredUsers.Add(client, user);
                     showRegisteredPlayers();
                     showConnectedPlayers();
                     responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, ProtocolConstants.OK_RESPONSE_CODE);
                 }
                 else
                 {
-                    User userInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Value;
-                    TcpClient clientInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Key;
+                    User userInServer = registeredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Value;
+                    TcpClient clientInServer = registeredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Key;
                     if (userInServer.Connected)
                     {
                         responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, "400");
                     }
                     else
                     {
-
-                        RegisteredUsers.Remove(clientInServer);
-                        RegisteredUsers.Add(client, user);
+                        registeredUsers.Remove(clientInServer);
+                        registeredUsers.Add(client, user);
                         showRegisteredPlayers();
                         showConnectedPlayers();
                         responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, ProtocolConstants.OK_RESPONSE_CODE);
