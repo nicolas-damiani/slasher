@@ -21,29 +21,28 @@ namespace Slasher.Server
         public void AddUserToSystem(string name)
         {
             User user = new User(name);
-            var registeredUsers = system.GetInstance().RegisteredUsers;
-            if (!registeredUsers.ContainsValue(user))
+            var registeredUsers = ServerSystem.GetInstance().RegisteredUsers;
+            if (!registeredUsers.Contains(user))
             {
-                registeredUsers.Add(new TcpClient(), user);
+                registeredUsers.Add( user);
             }
             else
                 throw new ServerSystemException("Ya existe un usuario con ese nombre.");
         }
 
-        public Dictionary<TcpClient, User> GetRegisteredUsers()
+        public List<User> GetRegisteredUsers()
         {
-            return system.GetInstance().RegisteredUsers;
+            List<User> users=  ServerSystem.GetInstance().RegisteredUsers;
+            return users;
         }
 
         public void DeleteUser(string username)
         {
             User user = new User(username);
-            var registeredUsers = system.GetInstance().RegisteredUsers;
-            if (registeredUsers.ContainsValue(user))
+            var registeredUsers = ServerSystem.GetInstance().RegisteredUsers;
+            if (registeredUsers.Contains(user))
             {
-                User userInServer = registeredUsers.FirstOrDefault(x => x.Value.NickName.Equals(username)).Value;
-                var item = registeredUsers.First(kvp => kvp.Value.Equals(userInServer));
-                registeredUsers.Remove(item.Key);
+                registeredUsers.Remove(user);
             }
             else
                 throw new ServerSystemException("No existe un usuario con ese nombre");
@@ -53,13 +52,12 @@ namespace Slasher.Server
         public void ModifyUser(string newName)
         {
             User user = new User(newName);
-            var registeredUsers = system.GetInstance().RegisteredUsers;
-            if (registeredUsers.ContainsValue(user))
+            var registeredUsers = ServerSystem.GetInstance().RegisteredUsers;
+            if (registeredUsers.Contains(user))
             {
-                User userInServer = registeredUsers.FirstOrDefault(x => x.Value.NickName.Equals(newName)).Value;
-                var item = registeredUsers.First(kvp => kvp.Value.Equals(userInServer));
+                User userInServer = registeredUsers.FirstOrDefault(x => x.NickName.Equals(newName));
                 userInServer.NickName = newName;
-                registeredUsers[item.Key] = userInServer;
+                registeredUsers[registeredUsers.FindIndex(x => x.NickName.Equals(newName))] = userInServer;
             }
         }
     }

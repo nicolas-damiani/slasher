@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8104DE1D-DCDF-49A0-B31B-6402263FC96F}</ProjectGuid>
+    <ProjectGuid>{4A38513A-8E14-44B8-9182-D340B28C52ED}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AdminServerProgram</RootNamespace>
-    <AssemblyName>AdminServerProgram</AssemblyName>
+    <RootNamespace>WCFHosting</RootNamespace>
+    <AssemblyName>WCFHosting</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -35,7 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -44,17 +44,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Exceptions\Exceptions.csproj">
-      <Project>{94BE0A53-D0AF-4277-895D-B3FD575F30B8}</Project>
-      <Name>Exceptions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Slasher.Entities\Slasher.Entities.csproj">
       <Project>{3DDE6871-4FCF-42CD-855C-3978612A77B2}</Project>
       <Name>Slasher.Entities</Name>
@@ -63,9 +61,6 @@
       <Project>{130CC6BE-2E13-48C2-9E56-E5E85451954A}</Project>
       <Name>Slasher.Server</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

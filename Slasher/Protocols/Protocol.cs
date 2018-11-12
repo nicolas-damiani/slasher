@@ -105,10 +105,13 @@ namespace Protocols
             {
                 return true;
             }
+            else if (result.Equals("400"))
+            {
+                return false;
+            }
             else
             {
-                Console.WriteLine("no connected");
-                return false;
+                throw new Exception("Ocurrio un error inesperado");
             }
         }
 
@@ -129,7 +132,7 @@ namespace Protocols
             }
             else
             {
-                partSize =  (int)sourceFile.Length - ( i* ProtocolConstants.PART_SIZE) ; 
+                partSize = (int)sourceFile.Length - (i * ProtocolConstants.PART_SIZE);
             }
             byte[] total;
             byte[] output = new byte[partSize];
@@ -141,7 +144,7 @@ namespace Protocols
             if (i == 0)
             {
                 string response;
-                response = "REQ" + makeSizeTwo(ProtocolConstants.AVATAR_UPLOAD.ToString()) + makeSizeHeader(sourceFile.Length + "") + makeSizeTwo((parts).ToString());
+                response = "REQ" + makeSizeTwo(ProtocolConstants.AVATAR_UPLOAD.ToString()) + makeSizeHeader(sourceFile.Length + "") + makeSizeThree((parts).ToString());
                 byte[] requestBytes = stringToBytes(response);
                 total = new byte[requestBytes.Length + output.Length];
                 System.Buffer.BlockCopy(requestBytes, 0, total, 0, requestBytes.Length);

@@ -11,23 +11,21 @@ namespace Slasher.Server
     [Serializable]
     public class ServerSystem
     {
-        public Dictionary<TcpClient, User> RegisteredUsers { get; set; }
+        public List <User> RegisteredUsers { get; set; }
+        private static ServerSystem Instance = null;
 
         private ServerSystem()
         {
-            RegisteredUsers = new Dictionary<TcpClient, User>();
+            RegisteredUsers = new List<User>();
         }
 
-        public ServerSystem GetInstance()
+        public static ServerSystem GetInstance()
         {
-            if (RegisteredUsers == null)
+            if (Instance == null)
             {
-                return new ServerSystem();
+                Instance = new ServerSystem();
             }
-            else
-            {
-                return this;
-            }
+            return Instance;
         }
     }
 }

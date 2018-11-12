@@ -21,13 +21,13 @@ namespace AdminServerProgram
         static void Main(string[] args)
         {
 
-            IDictionary props = new Hashtable();
-            props["port"] = 0;
-            BinaryServerFormatterSinkProvider serverProvider = new BinaryServerFormatterSinkProvider();
-            new TcpChannel(props, null, serverProvider);
-            serverProvider.TypeFilterLevel = TypeFilterLevel.Full;
-            TcpChannel chan = new TcpChannel(props, null, serverProvider);
-            ChannelServices.RegisterChannel(chan, false);
+            ////IDictionary props = new Hashtable();
+            ////props["port"] = 5600;
+            ////BinaryServerFormatterSinkProvider serverProvider = new BinaryServerFormatterSinkProvider();
+            ////new TcpChannel(props, null, serverProvider);
+            ////serverProvider.TypeFilterLevel = TypeFilterLevel.Full;
+            ////TcpChannel chan = new TcpChannel(props, null, serverProvider);
+            ////ChannelServices.RegisterChannel(chan, false);
 
             remoteSystem = (ServerSystemController)Activator.GetObject(
                             typeof(ServerSystemController),
