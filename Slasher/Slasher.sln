@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminServerProgram", "Admin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCFHosting", "WCFHosting\WCFHosting.csproj", "{4A38513A-8E14-44B8-9182-D340B28C52ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slasher.LogServer", "Slasher.LogServer\Slasher.LogServer.csproj", "{640DE386-3210-457D-B27F-54C4CC3423B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{4A38513A-8E14-44B8-9182-D340B28C52ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A38513A-8E14-44B8-9182-D340B28C52ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A38513A-8E14-44B8-9182-D340B28C52ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{640DE386-3210-457D-B27F-54C4CC3423B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{640DE386-3210-457D-B27F-54C4CC3423B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{640DE386-3210-457D-B27F-54C4CC3423B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{640DE386-3210-457D-B27F-54C4CC3423B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

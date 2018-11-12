@@ -33,5 +33,29 @@ namespace Slasher.Server
                 }
             }
         }
+
+        public void RemoveLogs()
+        {
+            string queueName = @".\private$\myqueue2";
+            MessageQueue msMq = null;
+            if (MessageQueue.Exists(queueName))
+            {
+                using (msMq = new MessageQueue(queueName))
+                {
+                    try
+                    {
+                        msMq.Purge();
+                    }
+                    catch (MessageQueueException ee)
+                    {
+                        Console.Write(ee.ToString());
+                    }
+                    catch (Exception eee)
+                    {
+                        Console.Write(eee.ToString());
+                    }
+                }
+            }
+        }
     }
 }

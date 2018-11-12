@@ -1,13 +1,13 @@
 ﻿using Exceptions;
+using Slasher.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
-namespace Slasher.Entities
+namespace Slasher.Server
 {
     public class Match
     {
@@ -24,9 +24,10 @@ namespace Slasher.Entities
         private readonly object lockMap = new object();
         Thread timerThread;
         Thread restartThread;
+        Logger Logger;
         public List<User> Winners { get; set; }
 
-        public Match()
+        public Match(Logger logger)
         {
             MovementCommands = new Dictionary<string, Direction>()
             {
@@ -35,13 +36,15 @@ namespace Slasher.Entities
                 { "izquierda", Direction.LEFT},
                 { "derecha", Direction.RIGHT}
             };
+            this.Logger = logger;
         }
 
         public void StartMatch()
         {
+            Logger.RemoveLogs();
             Users = new List<User>();
             Winners = new List<User>();
-            Map = new User[LAST_ROW+1, LAST_COL+1];
+            Map = new User[LAST_ROW + 1, LAST_COL + 1];
             InitializeMap();
             Active = true;
             Restarting = false;
@@ -90,9 +93,9 @@ namespace Slasher.Entities
 
         private void InitializeMap()
         {
-            for (int i = FIRST_ROW; i < LAST_ROW+1; i++)
+            for (int i = FIRST_ROW; i < LAST_ROW + 1; i++)
             {
-                for (int j = FIRST_COL; j < LAST_COL+1; j++)
+                for (int j = FIRST_COL; j < LAST_COL + 1; j++)
                 {
                     Map.SetValue(null, i, j);
                 }
@@ -398,7 +401,7 @@ namespace Slasher.Entities
                 }
             }
         }
-        
+
         private void AttackInsideBounds(Tuple<int, int> position, Direction direction)
         {
             switch (direction)

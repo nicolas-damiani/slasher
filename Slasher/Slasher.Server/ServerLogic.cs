@@ -25,6 +25,7 @@ namespace Slasher.Server
         public bool Connected { get; set; }
         public ServerSystemController ServerSystemController { get; set; }
         public Dictionary<TcpClient, User> RegisteredUsers { get; set; }
+        public Logger Logger { get; set; }
         private static string startupPath = "Archivos";
         public TcpListener Listener;
         private object registrationLock;
@@ -32,9 +33,9 @@ namespace Slasher.Server
 
         public ServerLogic()
         {
-            Match = new Match();
+            Logger = new Logger();
+            Match = new Match(Logger);
             registrationLock = new object();
-            Match = new Match();
             Match.StartMatch();
             RegisteredUsers = new Dictionary<TcpClient, User>();
 
@@ -229,6 +230,7 @@ namespace Slasher.Server
                     if (Match.MovementCommands.ContainsKey(direction))
                     {
                         string closePlayers = Match.MovePlayer(user, Match.MovementCommands[direction]);
+                        Logger.LogData(user.NickName + " movió su jugador");
                         byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.MOVEMENT, "200|" + closePlayers);
                         nws.Write(responseStream, 0, responseStream.Length);
                     }
@@ -240,6 +242,7 @@ namespace Slasher.Server
                     if (Match.MovementCommands.ContainsKey(direction))
                     {
                         string attackResponse = Match.PlayerAttack(user, Match.MovementCommands[direction]);
+                        Logger.LogData(user.NickName + " atacó un jugador");
                         byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.ATTACK, "200|" + attackResponse);
                         nws.Write(responseStream, 0, responseStream.Length);
                     }
@@ -329,6 +332,7 @@ namespace Slasher.Server
                     Match.AddUserToMatch(user);
                 }
                 responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.JOIN_MATCH, ProtocolConstants.OK_RESPONSE_CODE);
+                Logger.LogData(user.NickName + " se unió a la partida");
                 nws.Write(responseStream, 0, responseStream.Length);
             }
             else
