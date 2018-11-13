@@ -23,6 +23,11 @@ namespace Slasher.Entities
         public int Turn { get; set; }
         [DataMember]
         public Dictionary<string, CharacterType> CharacterTypesCommand;
+        [DataMember]
+        public int CurrentKills { get; set; }
+        [DataMember]
+        public Tuple<int, DateTime, CharacterType> RecordInfo { get; set; }
+
 
         public User(string nickname, string avatar)
         {
@@ -30,6 +35,7 @@ namespace Slasher.Entities
             Avatar = avatar;
             Connected = true;
             Turn = 0;
+            CurrentKills = 0;
             CharacterTypesCommand = new Dictionary<string, CharacterType>()
             {
                 { "monstruo", CharacterType.MONSTER },
@@ -42,6 +48,7 @@ namespace Slasher.Entities
             NickName = nickname;
             Connected = true;
             Turn = 0;
+            CurrentKills = 0;
             CharacterTypesCommand = new Dictionary<string, CharacterType>()
             {
                 { "monstruo", CharacterType.MONSTER },

@@ -33,11 +33,7 @@ namespace Slasher.Server
 
         public ServerLogic()
         {
-            Logger = new Logger();
-            Match = new Match(Logger);
-            registrationLock = new object();
-            Match.StartMatch();
-            RegisteredUsers = new Dictionary<TcpClient, User>();
+
 
             IDictionary props = new Hashtable();
             props["port"] = 1234;
@@ -51,10 +47,17 @@ namespace Slasher.Server
                 "ServerSystemControllerUri",
                 WellKnownObjectMode.Singleton);
 
+
             ServerSystemController = (ServerSystemController)Activator.GetObject(
                             typeof(ServerSystemController),
-                            "tcp://localhost:1234/ServerSystemControllerUri");
-            
+                            "tcp://localhost:1234/ServerSystemControllerUri",
+                WellKnownObjectMode.Singleton);
+            Logger = new Logger();
+            Match = new Match(Logger, ServerSystemController);
+            registrationLock = new object();
+            Match.StartMatch();
+            RegisteredUsers = new Dictionary<TcpClient, User>();
+
 
         }
 

@@ -21,13 +21,15 @@ namespace Slasher.Server
         private const int LAST_ROW = 7;
         private const int FIRST_COL = 0;
         private const int LAST_COL = 7;
+        public int Id { get; set; }
+        public ServerSystemController ServerSystemController { get; set; }
         private readonly object lockMap = new object();
         Thread timerThread;
         Thread restartThread;
         Logger Logger;
         public List<User> Winners { get; set; }
 
-        public Match(Logger logger)
+        public Match(Logger logger, ServerSystemController serverSystemController)
         {
             MovementCommands = new Dictionary<string, Direction>()
             {
@@ -37,6 +39,8 @@ namespace Slasher.Server
                 { "derecha", Direction.RIGHT}
             };
             this.Logger = logger;
+            Id = 0;
+            ServerSystemController = serverSystemController;
         }
 
         public void StartMatch()
@@ -65,16 +69,47 @@ namespace Slasher.Server
                         restartThread.Start();
                     }
                     Active = false;
+                    checkRecordPoints();
                     IsThereSurvivorsLeft();
                 }
             }
         }
 
+        private void checkRecordPoints()
+        {
+            List<UserScore> userScores = new List<UserScore>();
+            foreach (User user in Users)
+            {
+                UserScore userScore = new UserScore();
+                userScore.CharacterType = user.Character.Type;
+                userScore.user = user;
+                userScore.Date = DateTime.Now;
+                userScore.Score = user.CurrentKills;
+                userScores.Add(userScore);
+            }
+            ServerSystemController.AddScores(userScores);
+        }
+
         private void BeginMatchRestart()
         {
             Restarting = true;
+            checkRecordPoints();
+            sendStatistics();
+            Id++;
             Thread.Sleep(10000);
             StartMatch();
+        }
+
+        private void sendStatistics()
+        {
+            MatchPlayerStatistic statistic = new MatchPlayerStatistic();
+            statistic.MatchId = Id;
+            foreach (User user in Users)
+            {
+                Tuple<User, bool> tuple = new Tuple<User, bool>(user, Winners.Contains(user));
+                statistic.userList.Add(tuple);
+            }
+            ServerSystemController.AddStatistic(statistic);
         }
 
         private void IsThereSurvivorsLeft()
@@ -212,7 +247,10 @@ namespace Slasher.Server
                     Winners.Add(aliveUsers[0]);
                     Active = false;
                     if (!Restarting)
+                    {
                         restartThread = new Thread(BeginMatchRestart);
+                        restartThread.Start();
+                    }
                     throw new MonsterWinsException();
                 }
             }
@@ -237,7 +275,10 @@ namespace Slasher.Server
                 Winners = aliveUsers;
                 Active = false;
                 if (!Restarting)
+                {
                     restartThread = new Thread(BeginMatchRestart);
+                    restartThread.Start();
+                }
                 throw new SurvivorsWinException();
             }
         }
@@ -378,6 +419,7 @@ namespace Slasher.Server
                             Tuple<int, int> position = FindUserPosition(user);
                             AttackInsideBounds(position, direction);
                             AttackTarget(user, position, direction);
+                            user.CurrentKills++;
                             user.Turn = user.Turn + 1;
                             CheckFinishedMatch();
                             ProcessAllTurns();
