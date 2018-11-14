@@ -24,6 +24,8 @@ namespace Protocols
         public const int MOVEMENT = 40;
         public const int ATTACK = 50;
         public const int END_OF_MATCH = 60;
+        public const int PLAYER_DELETED = 70;
+
         public const int ERROR = 99;
 
     }

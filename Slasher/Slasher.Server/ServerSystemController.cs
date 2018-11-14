@@ -18,9 +18,8 @@ namespace Slasher.Server
         {
         }
 
-        public void AddUserToSystem(string name)
+        public void AddUserToSystem(User user)
         {
-            User user = new User(name);
             var registeredUsers = ServerSystem.GetInstance().RegisteredUsers;
             if (!registeredUsers.Contains(user))
             {
@@ -49,15 +48,17 @@ namespace Slasher.Server
 
         }
 
-        public void ModifyUser(string newName)
+        public void ModifyUser(string oldname, string newName)
         {
-            User user = new User(newName);
+            User user = new User(oldname);
             var registeredUsers = ServerSystem.GetInstance().RegisteredUsers;
             if (registeredUsers.Contains(user))
             {
-                User userInServer = registeredUsers.FirstOrDefault(x => x.NickName.Equals(newName));
+                User userInServer = registeredUsers.FirstOrDefault(x => x.NickName.Equals(oldname));
                 userInServer.NickName = newName;
-                registeredUsers[registeredUsers.FindIndex(x => x.NickName.Equals(newName))] = userInServer;
+            }else
+            {
+                throw new ServerSystemException("No existe un usuario con ese nombre.");
             }
         }
 
@@ -83,11 +84,22 @@ namespace Slasher.Server
         {
             List<UserScore> sortedList = ServerSystem.GetInstance().UserScores.OrderByDescending(o => o.Score).ToList();
             List<UserScore> returnList = new List<UserScore>();
-                for (int i = 0; i < Math.Min(sortedList.Count, 10); i++)
-                {
-                    returnList.Add(sortedList[i]);
-                }
+            for (int i = 0; i < Math.Min(sortedList.Count, 10); i++)
+            {
+                returnList.Add(sortedList[i]);
+            }
             return returnList;
+        }
+
+        public User GetUserInServer(User user)
+        {
+            var registeredUsers = ServerSystem.GetInstance().RegisteredUsers;
+            if (registeredUsers.Contains(user))
+            {
+                User userInServer = registeredUsers.FirstOrDefault(x => x.NickName.Equals(user.NickName));
+                return userInServer;
+            }
+            return null;
         }
     }
 }

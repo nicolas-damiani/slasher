@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/System" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/System" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:4321/SlasherService?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Slasher.Entities" />
+  <xs:complexType name="TupleOfintdateTimeCharacterType_PcPE1b9S">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="TupleOf{0}{1}{2}{#}" Namespace="http://schemas.datacontract.org/2004/07/System" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="int" Namespace="http://www.w3.org/2001/XMLSchema" />
+          <GenericParameter Name="dateTime" Namespace="http://www.w3.org/2001/XMLSchema" />
+          <GenericParameter Name="CharacterType" Namespace="http://schemas.datacontract.org/2004/07/Slasher.Entities" />
+        </GenericType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="m_Item1" type="xs:int" />
+      <xs:element name="m_Item2" type="xs:dateTime" />
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Slasher.Entities" name="m_Item3" type="q1:CharacterType" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="TupleOfintdateTimeCharacterType_PcPE1b9S" nillable="true" type="tns:TupleOfintdateTimeCharacterType_PcPE1b9S" />
+  <xs:complexType name="ArrayOfTupleOfUserbooleanHN06RWJx">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="TupleOfUserbooleanHN06RWJx" nillable="true" type="tns:TupleOfUserbooleanHN06RWJx" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfTupleOfUserbooleanHN06RWJx" nillable="true" type="tns:ArrayOfTupleOfUserbooleanHN06RWJx" />
+  <xs:complexType name="TupleOfUserbooleanHN06RWJx">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="TupleOf{0}{1}{#}" Namespace="http://schemas.datacontract.org/2004/07/System" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="User" Namespace="http://schemas.datacontract.org/2004/07/Slasher.Entities" />
+          <GenericParameter Name="boolean" Namespace="http://www.w3.org/2001/XMLSchema" />
+        </GenericType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Slasher.Entities" name="m_Item1" nillable="true" type="q2:User" />
+      <xs:element name="m_Item2" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="TupleOfUserbooleanHN06RWJx" nillable="true" type="tns:TupleOfUserbooleanHN06RWJx" />
+</xs:schema>

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WCFHosting
 {
-    class Program
+    class MainProgram
     {
         static void Main(string[] args)
         {
@@ -16,7 +16,7 @@ namespace WCFHosting
             try
             {
                 //Base Address for StudentService
-                Uri httpBaseAddress = new Uri("http://localhost:4321/StudentService");
+                Uri httpBaseAddress = new Uri("http://localhost:4321/SlasherService");
 
                 //Instantiate ServiceHost
                 studentServiceHost = new ServiceHost(
@@ -42,7 +42,7 @@ namespace WCFHosting
             catch (Exception ex)
             {
                 studentServiceHost = null;
-                Console.WriteLine("There is an issue with StudentService" + ex.Message);
+                Console.WriteLine("There is an issue with SlasherService" + ex.Message);
                 Console.ReadKey();
             }
         }

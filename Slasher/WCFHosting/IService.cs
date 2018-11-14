@@ -14,7 +14,7 @@ namespace WCFHosting
     {
 
         [OperationContract]
-        void AddUserToSystem(string name);
+        void AddUserToSystem(User user);
 
         [OperationContract]
         List<User> GetRegisteredUsers();
@@ -23,7 +23,21 @@ namespace WCFHosting
         void DeleteUser(string username);
 
         [OperationContract]
-        void ModifyUser(string newName);
-    
+        void ModifyUser(string oldName, string newName);
+        
+        [OperationContract]
+        void AddStatistic(MatchPlayerStatistic statistic);
+
+
+        [OperationContract]
+        List<MatchPlayerStatistic> GetUserStatistics();
+
+        [OperationContract]
+        void AddScores(List<UserScore> userScores);
+
+        [OperationContract]
+        List<UserScore> GetHighScores();
+
+
     }
 }

@@ -180,18 +180,36 @@ namespace Slasher.Server
                         {
                             byte[] data = new byte[dataLength];
                             data = Protocol.GetData(client, dataLength);
-                            selectCharacterType(RegisteredUsers[client], nws, data);
+                            if (CheckIfUserDeletedOrModified(RegisteredUsers[client]))
+                                selectCharacterType(RegisteredUsers[client], nws, data);
+                            else
+                            {
+                                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.PLAYER_DELETED, ProtocolConstants.OK_RESPONSE_CODE);
+                                nws.Write(responseStream, 0, responseStream.Length);
+                            }
                             break;
                         }
                     case ProtocolConstants.JOIN_MATCH:
-                        joinMatch(RegisteredUsers[client], nws);
+                        if (CheckIfUserDeletedOrModified(RegisteredUsers[client]))
+                            joinMatch(RegisteredUsers[client], nws);
+                        else
+                        {
+                            byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.PLAYER_DELETED, ProtocolConstants.OK_RESPONSE_CODE);
+                            nws.Write(responseStream, 0, responseStream.Length);
+                        }
                         break;
                     case ProtocolConstants.MOVEMENT:
                         {
                             byte[] data = new byte[dataLength];
                             data = Protocol.GetData(client, dataLength);
                             string movement = UnicodeEncoding.ASCII.GetString(data);
-                            playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
+                            if (CheckIfUserDeletedOrModified(RegisteredUsers[client]))
+                                playerAction(nws, RegisteredUsers[client], movement, ActionType.MOVEMENT);
+                            else
+                            {
+                                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.PLAYER_DELETED, ProtocolConstants.OK_RESPONSE_CODE);
+                                nws.Write(responseStream, 0, responseStream.Length);
+                            }
                             break;
                         }
                     case ProtocolConstants.ATTACK:
@@ -199,7 +217,13 @@ namespace Slasher.Server
                             byte[] data = new byte[dataLength];
                             data = Protocol.GetData(client, dataLength);
                             string attackDirection = UnicodeEncoding.ASCII.GetString(data);
-                            playerAction(nws, RegisteredUsers[client], attackDirection, ActionType.ATTACK);
+                            if (CheckIfUserDeletedOrModified(RegisteredUsers[client]))
+                                playerAction(nws, RegisteredUsers[client], attackDirection, ActionType.ATTACK);
+                            else
+                            {
+                                byte[] responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.PLAYER_DELETED, ProtocolConstants.OK_RESPONSE_CODE);
+                                nws.Write(responseStream, 0, responseStream.Length);
+                            }
                             break;
                         }
                 };
@@ -344,6 +368,32 @@ namespace Slasher.Server
             }
         }
 
+        private bool CheckIfUserDeletedOrModified(User user)
+        {
+            List<User> remoteUsers = ServerSystemController.GetRegisteredUsers();
+            List<User> filteredListed = remoteUsers.Where(p => p.Id == user.Id).ToList();
+            if (filteredListed.Count > 0)
+            {
+                User userInList = filteredListed[0];
+                if (userInList.NickName != user.NickName)
+                {
+                    User userInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(user.NickName)).Value;
+                    TcpClient clientInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(user.NickName)).Key;
+                    RegisteredUsers.Remove(clientInServer);
+                    userInServer.NickName = userInList.NickName;
+                    RegisteredUsers.Add(clientInServer, userInServer);
+                    showRegisteredPlayers();
+                    showConnectedPlayers();
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
         private void sendAuthorizatonData(string data, NetworkStream nws, TcpClient client, ref User user)
         {
             List<User> remoteUsers = ServerSystemController.GetRegisteredUsers();
@@ -353,15 +403,13 @@ namespace Slasher.Server
                 if (!remoteUsers.Contains(user))
                 {
                     RegisteredUsers.Add(client, user);
-                    ServerSystemController.AddUserToSystem(user.NickName);
+                    ServerSystemController.AddUserToSystem(user);
                     showRegisteredPlayers();
                     showConnectedPlayers();
                     responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, ProtocolConstants.OK_RESPONSE_CODE);
                 }
                 else
                 {
-                    //lista remota de usuarios contiene al usuario
-
                     if (RegisteredUsers.ContainsValue(user))
                     {
                         User userInServer = RegisteredUsers.FirstOrDefault(x => x.Value.NickName.Equals(data)).Value;
@@ -373,8 +421,9 @@ namespace Slasher.Server
                         }
                         else
                         {
+                            User userFromServer = ServerSystemController.GetUserInServer(user);
                             RegisteredUsers.Remove(clientInServer);
-                            RegisteredUsers.Add(client, user);
+                            RegisteredUsers.Add(client, userFromServer);
                             showRegisteredPlayers();
                             showConnectedPlayers();
                             responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, ProtocolConstants.OK_RESPONSE_CODE);
@@ -382,7 +431,8 @@ namespace Slasher.Server
                     }
                     else
                     {
-                        RegisteredUsers.Add(client, user);
+                        User userFromServer = ServerSystemController.GetUserInServer(user);
+                        RegisteredUsers.Add(client, userFromServer);
                         showRegisteredPlayers();
                         showConnectedPlayers();
                         responseStream = Protocol.GenerateStream(ProtocolConstants.SendType.RESPONSE, ProtocolConstants.LOGIN, ProtocolConstants.OK_RESPONSE_CODE);

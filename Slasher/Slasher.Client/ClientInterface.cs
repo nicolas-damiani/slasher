@@ -86,6 +86,13 @@ namespace Slasher.Client
             catch (SessionEndedException)
             {
             }
+            catch (UserDeletedException)
+            {
+                Console.WriteLine("Usuario fue eliminado");
+                clientLogic.TcpClient.Close();
+                clientLogic.Connected = false;
+                Console.ReadLine();
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);

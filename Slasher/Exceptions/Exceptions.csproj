@@ -56,6 +56,7 @@
     <Compile Include="ServerSystemException.cs" />
     <Compile Include="SessionEndedException.cs" />
     <Compile Include="SurvivorsWinException.cs" />
+    <Compile Include="UserDeletedException.cs" />
     <Compile Include="UserIsDeadException.cs" />
     <Compile Include="UserNotInMatchException.cs" />
     <Compile Include="UserTurnLimitException.cs" />

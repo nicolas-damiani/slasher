@@ -16,13 +16,13 @@ namespace WCFHosting
         public Service() {
             remoteObject = (ServerSystemController)Activator.GetObject(
                             typeof(ServerSystemController),
-                            "ServerSystemControllerUri",
+                            "tcp://localhost:1234/ServerSystemControllerUri",
                             WellKnownObjectMode.Singleton);
         }
 
-        public void AddUserToSystem(string name)
+        public void AddUserToSystem(User user)
         {
-            remoteObject.AddUserToSystem(name);
+            remoteObject.AddUserToSystem(user);
         }
 
         public void DeleteUser(string username)
@@ -35,9 +35,29 @@ namespace WCFHosting
             return remoteObject.GetRegisteredUsers();
         }
 
-        public void ModifyUser(string newName)
+        public void ModifyUser(string oldName, string newName)
         {
-            remoteObject.ModifyUser(newName);
+            remoteObject.ModifyUser(oldName, newName);
+        }
+
+        public void AddStatistic(MatchPlayerStatistic statistic)
+        {
+            remoteObject.AddStatistic(statistic);
+        }
+
+        public List<MatchPlayerStatistic> GetUserStatistics()
+        {
+            return remoteObject.GetUserStatistics();
+        }
+
+        public void AddScores(List<UserScore> userScores)
+        {
+            remoteObject.AddScores(userScores);
+        }
+
+        public List<UserScore> GetHighScores()
+        {
+            return remoteObject.GetHighScores();
         }
     }
 }

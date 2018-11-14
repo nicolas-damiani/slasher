@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="dd642107-6626-4029-b841-0c15da94257c" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:4321/SlasherService" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="SlasherService.xsd" MetadataType="Schema" ID="c147d707-f792-4071-b257-90f997d3917f" SourceId="1" SourceUrl="http://localhost:4321/SlasherService?xsd=xsd0" />
+    <MetadataFile FileName="SlasherService1.xsd" MetadataType="Schema" ID="27b4954e-6f77-4c4c-b029-70b11128a3b2" SourceId="1" SourceUrl="http://localhost:4321/SlasherService?xsd=xsd1" />
+    <MetadataFile FileName="SlasherService2.xsd" MetadataType="Schema" ID="8e1e1c1c-aab5-4842-803e-5453a8ba4aa8" SourceId="1" SourceUrl="http://localhost:4321/SlasherService?xsd=xsd2" />
+    <MetadataFile FileName="SlasherService3.xsd" MetadataType="Schema" ID="a45bb0a2-0c1b-401c-97d3-74da05485441" SourceId="1" SourceUrl="http://localhost:4321/SlasherService?xsd=xsd3" />
+    <MetadataFile FileName="SlasherService4.xsd" MetadataType="Schema" ID="9f8c102c-4159-4713-b585-ad47601ac79e" SourceId="1" SourceUrl="http://localhost:4321/SlasherService?xsd=xsd4" />
+    <MetadataFile FileName="SlasherService.disco" MetadataType="Disco" ID="846340f1-686f-4c97-8505-83f695669dc5" SourceId="1" SourceUrl="http://localhost:4321/SlasherService?disco" />
+    <MetadataFile FileName="Service.wsdl" MetadataType="Wsdl" ID="a934b783-d21c-4de2-9ebc-fcde0baac256" SourceId="1" SourceUrl="http://localhost:4321/SlasherService?wsdl" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

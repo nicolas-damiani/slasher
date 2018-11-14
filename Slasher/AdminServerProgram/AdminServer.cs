@@ -11,28 +11,19 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading.Tasks;
+using AdminServerProgram.ServiceReference1;
+using WCFHosting;
 
 namespace AdminServerProgram
 {
-    class Program
+    class AdminServer
     {
-        public static ServerSystemController remoteSystem;
-
+        public static Service remoteSystem;
         static void Main(string[] args)
         {
-
-            ////IDictionary props = new Hashtable();
-            ////props["port"] = 5600;
-            ////BinaryServerFormatterSinkProvider serverProvider = new BinaryServerFormatterSinkProvider();
-            ////new TcpChannel(props, null, serverProvider);
-            ////serverProvider.TypeFilterLevel = TypeFilterLevel.Full;
-            ////TcpChannel chan = new TcpChannel(props, null, serverProvider);
-            ////ChannelServices.RegisterChannel(chan, false);
-
-            remoteSystem = (ServerSystemController)Activator.GetObject(
-                            typeof(ServerSystemController),
-                            "tcp://localhost:1234/ServerSystemControllerUri",
-                WellKnownObjectMode.Singleton);
+            
+            
+            remoteSystem = new Service();
             bool running = true;
             while (running)
             {
@@ -97,7 +88,7 @@ namespace AdminServerProgram
             Console.WriteLine("2) Modificar usuario");
             Console.WriteLine("3) Eliminar usuario");
             Console.WriteLine("4) Ver estadisticas de jugadores");
-            Console.WriteLine("5) -");
+            Console.WriteLine("5) Ver Highscores");
             Console.WriteLine("6) Desconectarse");
         }
 
@@ -105,7 +96,8 @@ namespace AdminServerProgram
         public static void AddUserToSystem()
         {
             Console.WriteLine("Ingrese nombre de usuario");
-            remoteSystem.AddUserToSystem(Console.ReadLine());
+            User user = new User(Console.ReadLine());
+            remoteSystem.AddUserToSystem(user);
             Console.WriteLine("Usuario ingresado correctamente.");
         }
 
@@ -140,8 +132,10 @@ namespace AdminServerProgram
 
         public static void ModifyUserInSystem()
         {
-            Console.WriteLine("Ingrese nombre de usuario");
-            remoteSystem.ModifyUser(Console.ReadLine());
+            Console.WriteLine("Ingrese nombre de usuario para cambiar");
+            string oldName = Console.ReadLine();
+            Console.WriteLine("Ingrese nuevo nombre");
+            remoteSystem.ModifyUser(oldName, Console.ReadLine());
             Console.WriteLine("Usuario modificado correctamente.");
         }
     }

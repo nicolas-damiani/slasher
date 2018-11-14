@@ -140,6 +140,9 @@ namespace Slasher.Client
                 case ProtocolConstants.END_OF_MATCH:
                     finishActiveMatch(data);
                     return attackResponse(data);
+                case ProtocolConstants.PLAYER_DELETED:
+                    InActiveMatch = false;
+                    throw new UserDeletedException();
                 case ProtocolConstants.ERROR:
                     serverError(data);
                     return "";
@@ -184,6 +187,7 @@ namespace Slasher.Client
                 throw new EndOfMatchException("La partida caducó, debe registrarse a la partida actual para jugar.");
             }
         }
+        
 
         private void CheckOkResponse(byte[] data)
         {

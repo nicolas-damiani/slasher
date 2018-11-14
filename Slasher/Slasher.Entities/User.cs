@@ -12,6 +12,8 @@ namespace Slasher.Entities
     public class User
     {
         [DataMember]
+        public string Id { get; set; }
+        [DataMember]
         public string NickName { get; set; }
         [DataMember]
         public string Avatar { get; set; }
@@ -36,6 +38,7 @@ namespace Slasher.Entities
             Connected = true;
             Turn = 0;
             CurrentKills = 0;
+            Id = Guid.NewGuid().ToString();
             CharacterTypesCommand = new Dictionary<string, CharacterType>()
             {
                 { "monstruo", CharacterType.MONSTER },
@@ -49,6 +52,7 @@ namespace Slasher.Entities
             Connected = true;
             Turn = 0;
             CurrentKills = 0;
+            Id = Guid.NewGuid().ToString();
             CharacterTypesCommand = new Dictionary<string, CharacterType>()
             {
                 { "monstruo", CharacterType.MONSTER },
@@ -60,6 +64,7 @@ namespace Slasher.Entities
         {
             Connected = true;
             Turn = 0;
+            Id = Guid.NewGuid().ToString();
             CharacterTypesCommand = new Dictionary<string, CharacterType>()
             {
                 { "monstruo", CharacterType.MONSTER },

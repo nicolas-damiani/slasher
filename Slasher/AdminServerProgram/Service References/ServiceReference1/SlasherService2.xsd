@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Slasher.Entities" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Slasher.Entities" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:4321/SlasherService?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:import schemaLocation="http://localhost:4321/SlasherService?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/System" />
+  <xs:complexType name="ArrayOfUser">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="User" nillable="true" type="tns:User" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfUser" nillable="true" type="tns:ArrayOfUser" />
+  <xs:complexType name="User">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Avatar" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Character" nillable="true" type="tns:Character" />
+      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="CharacterTypesCommand" nillable="true" type="q1:ArrayOfKeyValueOfstringCharacterTypeYaEay7Fk" />
+      <xs:element minOccurs="0" name="Connected" type="xs:boolean" />
+      <xs:element minOccurs="0" name="CurrentKills" type="xs:int" />
+      <xs:element minOccurs="0" name="NickName" nillable="true" type="xs:string" />
+      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/System" minOccurs="0" name="RecordInfo" nillable="true" type="q2:TupleOfintdateTimeCharacterType_PcPE1b9S" />
+      <xs:element minOccurs="0" name="Turn" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="User" nillable="true" type="tns:User" />
+  <xs:complexType name="Character">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="IsAlive" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Life" type="xs:int" />
+      <xs:element minOccurs="0" name="PowerAttack" type="xs:int" />
+      <xs:element minOccurs="0" name="Type" type="tns:CharacterType" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Character" nillable="true" type="tns:Character" />
+  <xs:simpleType name="CharacterType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="MONSTER" />
+      <xs:enumeration value="SURVIVOR" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="CharacterType" nillable="true" type="tns:CharacterType" />
+  <xs:complexType name="MatchPlayerStatistic">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="MatchId" type="xs:int" />
+      <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/System" minOccurs="0" name="userList" nillable="true" type="q3:ArrayOfTupleOfUserbooleanHN06RWJx" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MatchPlayerStatistic" nillable="true" type="tns:MatchPlayerStatistic" />
+  <xs:complexType name="ArrayOfMatchPlayerStatistic">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="MatchPlayerStatistic" nillable="true" type="tns:MatchPlayerStatistic" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfMatchPlayerStatistic" nillable="true" type="tns:ArrayOfMatchPlayerStatistic" />
+  <xs:complexType name="ArrayOfUserScore">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="UserScore" nillable="true" type="tns:UserScore" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfUserScore" nillable="true" type="tns:ArrayOfUserScore" />
+  <xs:complexType name="UserScore">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CharacterType" type="tns:CharacterType" />
+      <xs:element minOccurs="0" name="Date" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Score" type="xs:int" />
+      <xs:element minOccurs="0" name="user" nillable="true" type="tns:User" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="UserScore" nillable="true" type="tns:UserScore" />
+</xs:schema>
