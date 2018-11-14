@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Messaging;
 using System.Text;
@@ -15,7 +16,8 @@ namespace Slasher.LogServer
 
         static void Main(string[] args)
         {
-            SERVER_IP_ADDRESS = "192.168.1.54";//DataExchangeMethods.SetUpIpAddr();
+            SERVER_IP_ADDRESS = "192.168.1.54";
+            queueName = @"Formatname:DIRECT=TCP:"+ConfigurationManager.AppSettings["IpConfiguration"]+ @"\Private$\myqueue2";
             ShowMenu();
         }
 
